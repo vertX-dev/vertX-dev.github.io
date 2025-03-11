@@ -1,7 +1,7 @@
 // Global variables
 let selectedImageSrc = null;
 let highlightedCell = null;
-const totalRows = 10, totalCols = 10;
+const totalRows = 21, totalCols = 25;
 const gridContainer = document.getElementById('grid-container');
 
 // Create grid cells (each cell represents one “unit” of 16x16 pixels)
