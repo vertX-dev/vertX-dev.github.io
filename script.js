@@ -233,5 +233,5 @@ generateButton.addEventListener('click', () => {
       hasImage: cell.innerHTML.trim() !== ''
     });
   }
-  console.log('Matrix:', matrix);
+  alert('Matrix:', matrix);
 });
