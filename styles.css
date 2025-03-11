@@ -33,13 +33,13 @@ header {
   background: #051928;
 }
 
-/* Grid container: 28x28 cells, each 16px x 16px */
+/* Grid container: 28x24 cells, each 16px x 16px */
 #grid-container {
   display: grid;
   grid-template-columns: repeat(28, 16px);
-  grid-template-rows: repeat(28, 16px);
+  grid-template-rows: repeat(24, 16px);
   width: calc(28 * 16px);
-  height: calc(28 * 16px);
+  height: calc(24 * 16px);
   border: 3px solid #888;
   background: #fff;
 }
