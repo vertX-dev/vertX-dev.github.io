@@ -1,6 +1,6 @@
 // Global variables
 let selectedImageSrc = null;
-let highlightedCell = null;
+let highlightedCells = [];
 const totalRows = 21, totalCols = 25;
 const gridContainer = document.getElementById('grid-container');
 
@@ -31,9 +31,9 @@ gridContainer.addEventListener('click', function(e) {
   }
 
   // If the clicked cell is already highlighted, place the image.
-  if (highlightedCell === cell) {
-    cell.classList.remove('highlighted');
-    highlightedCell = null;
+  if (highlightedCells.includes(cell)) {
+    highlightedCells.forEach(c => c.classList.remove('highlighted'));
+    highlightedCells = [];
 
     // Create a temporary image to determine its natural size.
     const tempImg = new Image();
@@ -99,12 +99,38 @@ gridContainer.addEventListener('click', function(e) {
     }
     tempImg.src = selectedImageSrc;
   } else {
-    // Highlight the cell if it's not already highlighted.
-    if (highlightedCell) {
-      highlightedCell.classList.remove('highlighted');
+    if (highlightedCells.length > 0) {
+      highlightedCells.forEach(c => c.classList.remove('highlighted'));
+      highlightedCells = [];
     }
-    cell.classList.add('highlighted');
-    highlightedCell = cell;
+
+    // Create a temporary image to determine its natural size.
+    const tempImg = new Image();
+    tempImg.onload = function() {
+      const naturalWidth = tempImg.naturalWidth;
+      const naturalHeight = tempImg.naturalHeight;
+      const cellsX = Math.ceil(naturalWidth / 16);
+      const cellsY = Math.ceil(naturalHeight / 16);
+
+      const anchorOffsetX = Math.floor(cellsX / 2);
+      const anchorOffsetY = Math.floor(cellsY / 2);
+      const topLeftCol = anchorCol - anchorOffsetX;
+      const topLeftRow = anchorRow - anchorOffsetY;
+
+      for (let j = 0; j < cellsY; j++) {
+        for (let i = 0; i < cellsX; i++) {
+          const cellCol = topLeftCol + i;
+          const cellRow = topLeftRow + j;
+          if (cellCol >= 0 && cellCol < totalCols && cellRow >= 0 && cellRow < totalRows) {
+            const index = cellRow * totalCols + cellCol;
+            const gridCell = gridContainer.children[index];
+            gridCell.classList.add('highlighted');
+            highlightedCells.push(gridCell);
+          }
+        }
+      }
+    }
+    tempImg.src = selectedImageSrc;
   }
 });
 
