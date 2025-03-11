@@ -52,7 +52,7 @@ gridContainer.addEventListener('click', function(e) {
         // Determine how many 16x16 cells are needed.
         const cellsX = Math.ceil(naturalWidth / 16);
         const cellsY = Math.ceil(naturalHeight / 16);
-        
+
         // Create an offscreen canvas to scale the entire image
         // to exactly cellsX*16 by cellsY*16 pixels.
         const scaledCanvas = document.createElement('canvas');
@@ -60,13 +60,13 @@ gridContainer.addEventListener('click', function(e) {
         scaledCanvas.height = cellsY * 16;
         const scaledCtx = scaledCanvas.getContext('2d');
         scaledCtx.drawImage(tempImg, 0, 0, scaledCanvas.width, scaledCanvas.height);
-        
+
         // Calculate offsets so that the clicked cell is centered.
         const anchorOffsetX = Math.floor(cellsX / 2);
         const anchorOffsetY = Math.floor(cellsY / 2);
         const topLeftCol = anchorCol - anchorOffsetX;
         const topLeftRow = anchorRow - anchorOffsetY;
-        
+
         // For each cell piece, crop out a 16x16 chunk from the scaled canvas.
         for (let j = 0; j < cellsY; j++) {
           for (let i = 0; i < cellsX; i++) {
@@ -77,7 +77,7 @@ gridContainer.addEventListener('click', function(e) {
               const index = cellRow * totalCols + cellCol;
               const gridCell = gridContainer.children[index];
               gridCell.innerHTML = "";
-              
+
               // Create a new canvas for each cell piece.
               const cellCanvas = document.createElement('canvas');
               cellCanvas.width = 16;
@@ -85,7 +85,7 @@ gridContainer.addEventListener('click', function(e) {
               const cellCtx = cellCanvas.getContext('2d');
               // Crop the 16x16 piece from the scaled canvas.
               cellCtx.drawImage(scaledCanvas, i * 16, j * 16, 16, 16, 0, 0, 16, 16);
-              
+
               // Create an image from the canvas and insert it into the grid cell.
               const pieceImg = document.createElement('img');
               pieceImg.src = cellCanvas.toDataURL();
@@ -156,4 +156,80 @@ imageUpload.addEventListener('change', function(e) {
     reader.readAsDataURL(file);
   }
   imageUpload.value = "";
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const gridContainer = document.getElementById('grid-container');
+  const clearButton = document.getElementById('clear-button');
+  const generateButton = document.getElementById('generate-button');
+  const imageUpload = document.getElementById('image-upload');
+  const gallery = document.getElementById('gallery');
+
+  let matrix = [];
+  let images = {};
+  let currentImageId = 1;
+
+  // Function to clear the grid
+  clearButton.addEventListener('click', () => {
+    gridContainer.innerHTML = '';
+    matrix = [];
+  });
+
+  // Function to generate the matrix with information about each cell
+  generateButton.addEventListener('click', () => {
+    console.log('Matrix:', matrix);
+    console.log('Images:', images);
+  });
+
+  // Handle image upload
+  imageUpload.addEventListener('change', event => {
+    const files = event.target.files;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const imgId = currentImageId++;
+          images[imgId] = {
+            src: img.src,
+            width: img.width,
+            height: img.height
+          };
+          addImageToGallery(img, imgId);
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Add uploaded image to gallery
+  function addImageToGallery(img, imgId) {
+    const imgElement = document.createElement('img');
+    imgElement.src = img.src;
+    imgElement.dataset.imgId = imgId;
+    imgElement.classList.add('gallery-image');
+    gallery.appendChild(imgElement);
+
+    imgElement.addEventListener('click', () => {
+      addToGrid(imgElement);
+    });
+  }
+
+  // Add image to grid
+  function addToGrid(imgElement) {
+    const imgId = imgElement.dataset.imgId;
+    const gridItem = document.createElement('div');
+    gridItem.classList.add('grid-item');
+    gridItem.style.backgroundImage = `url(${images[imgId].src})`;
+
+    gridItem.addEventListener('click', () => {
+      const subId = imgId + '.' + (Math.random().toString(36).substring(2, 5));
+      gridItem.dataset.imgId = subId;
+      matrix.push({ cellId: subId, imgId: imgId });
+    });
+
+    gridContainer.appendChild(gridItem);
+  }
 });
