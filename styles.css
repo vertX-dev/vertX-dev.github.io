@@ -45,8 +45,8 @@ header {
   display: grid;
   grid-template-columns: repeat(16, 16px);
   grid-template-rows: repeat(16, 16px);
-  width: calc(16 * 16px);
-  height: calc(16 * 16px);
+  width: calc(16 * 16px + 6px); /* Add 2 * border width (3px) */
+  height: calc(16 * 16px + 6px); /* Add 2 * border width (3px) */
   border: 3px solid #888;
   background: #2e2e2e;
 }
