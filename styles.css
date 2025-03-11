@@ -1,0 +1,94 @@
+/* Reset and basic styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body, html {
+  font-family: sans-serif;
+  height: 100%;
+  background: #051928; /* Dark background */
+  color: #fff;
+}
+header {
+  background: #333;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Main container: grid on left, sidebar on right */
+.container {
+  display: flex;
+  height: calc(100vh - 50px); /* leave space for header */
+}
+
+/* Grid wrapper: scrollable and centered */
+.grid-wrapper {
+  width: 80%;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #051928;
+}
+
+/* Grid container: 32x32 cells, each 16px x 16px */
+#grid-container {
+  display: grid;
+  grid-template-columns: repeat(32, 16px);
+  grid-template-rows: repeat(32, 16px);
+  width: calc(32 * 16px);
+  height: calc(32 * 16px);
+  border: 3px solid #888;
+  background: #fff;
+}
+.grid-cell {
+  border: 1px solid #ddd;
+  position: relative;
+  cursor: pointer;
+  background-color: transparent;
+}
+.grid-cell.highlighted {
+  background-color: rgba(0, 255, 0, 0.3);
+}
+
+/* Sidebar: gallery and upload */
+.sidebar {
+  width: 20%;
+  padding: 10px;
+  overflow-y: auto;
+  background: #051928;
+}
+
+/* Gallery grid styling */
+#gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 120px);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+#gallery img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+#gallery img.selected {
+  border-color: blue;
+}
+.upload-btn {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media(max-width: 690px) {
+  .container {
+    flex-direction: column;
+  }
+  .grid-wrapper, .sidebar {
+    width: 100%;
+    height: 50vh;
+  }
+}
