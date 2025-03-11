@@ -1,7 +1,7 @@
 // Global variables
 let selectedImageSrc = null;
 let highlightedCells = [];
-const totalRows = 21, totalCols = 25;
+const totalRows = 16, totalCols = 16;
 const gridContainer = document.getElementById('grid-container');
 let clearMode = false;
 let currentImageId = 1; // numeric ID for each uploaded image
