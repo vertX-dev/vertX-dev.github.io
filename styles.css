@@ -36,10 +36,10 @@ header {
 /* Grid container: 28x24 cells, each 16px x 16px */
 #grid-container {
   display: grid;
-  grid-template-columns: repeat(10, 16px);
-  grid-template-rows: repeat(10, 16px);
-  width: calc(10 * 16px);
-  height: calc(10 * 16px);
+  grid-template-columns: repeat(25, 16px);
+  grid-template-rows: repeat(21, 16px);
+  width: calc(25 * 16px);
+  height: calc(21 * 16px);
   border: 3px solid #888;
   background: #fff;
 }
