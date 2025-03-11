@@ -38,11 +38,6 @@ Want to improve the project? PRs and suggestions are welcome!
 
 📜 License
 
-This project is licensed under the MIT License.
-
-
----
-
-Let me know if you'd like any tweaks or additional sections!
+This project is licensed under the MIT License
 
 
