@@ -3,6 +3,7 @@ let selectedImageSrc = null;
 let highlightedCells = [];
 const totalRows = 21, totalCols = 25;
 const gridContainer = document.getElementById('grid-container');
+let clearMode = false;
 
 // Create grid cells (each cell represents one “unit” of 16x16 pixels)
 for (let row = 0; row < totalRows; row++) {
@@ -17,6 +18,8 @@ for (let row = 0; row < totalRows; row++) {
 
 // Handle grid cell clicks for image placement.
 gridContainer.addEventListener('click', function(e) {
+  if (clearMode) return; // Ignore clicks in clear mode
+
   let cell = e.target;
   if (!cell.classList.contains('grid-cell')) {
     cell = cell.closest('.grid-cell');
@@ -48,6 +51,7 @@ gridContainer.addEventListener('click', function(e) {
         placedImg.style.width = "100%";
         placedImg.style.height = "100%";
         cell.appendChild(placedImg);
+        cell.dataset.uid = `img-${Date.now()}`; // Assign UID to the cell
       } else {
         // Determine how many 16x16 cells are needed.
         const cellsX = Math.ceil(naturalWidth / 16);
@@ -66,6 +70,7 @@ gridContainer.addEventListener('click', function(e) {
         const anchorOffsetY = Math.floor(cellsY / 2);
         const topLeftCol = anchorCol - anchorOffsetX;
         const topLeftRow = anchorRow - anchorOffsetY;
+        const uid = `img-${Date.now()}`; // Generate UID for the image
 
         // For each cell piece, crop out a 16x16 chunk from the scaled canvas.
         for (let j = 0; j < cellsY; j++) {
@@ -92,6 +97,7 @@ gridContainer.addEventListener('click', function(e) {
               pieceImg.style.width = "100%";
               pieceImg.style.height = "100%";
               gridCell.appendChild(pieceImg);
+              gridCell.dataset.uid = uid; // Assign UID to the cell
             }
           }
         }
@@ -156,6 +162,44 @@ imageUpload.addEventListener('change', function(e) {
     reader.readAsDataURL(file);
   }
   imageUpload.value = "";
+});
+
+// Clear grid cells with same UID on double-click in clear mode
+gridContainer.addEventListener('dblclick', function(e) {
+  if (!clearMode) return;
+
+  let cell = e.target;
+  if (!cell.classList.contains('grid-cell')) {
+    cell = cell.closest('.grid-cell');
+    if (!cell) return;
+  }
+
+  const uid = cell.dataset.uid;
+  if (!uid) return;
+
+  const cells = gridContainer.querySelectorAll(`.grid-cell[data-uid="${uid}"]`);
+  cells.forEach(c => {
+    c.innerHTML = '';
+    delete c.dataset.uid;
+  });
+});
+
+// Enable clear mode
+const clearButton = document.getElementById('clear-button');
+clearButton.addEventListener('click', () => {
+  clearMode = !clearMode;
+  if (clearMode) {
+    clearButton.classList.add('active');
+  } else {
+    clearButton.classList.remove('active');
+  }
+});
+
+// Function to generate the matrix with information about each cell
+const generateButton = document.getElementById('generate-button');
+generateButton.addEventListener('click', () => {
+  console.log('Matrix:', matrix);
+  console.log('Images:', images);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
