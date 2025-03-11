@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple UI Builder</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>Simple UI Builder</h1>
+    </header>
+    <div class="container">
+      <!-- Main grid area -->
+      <div class="grid-wrapper">
+        <div id="grid-container"></div>
+      </div>
+      <!-- Sidebar: gallery and upload -->
+      <div class="sidebar">
+        <div id="gallery">
+          <!-- Uploaded image thumbnails will appear here -->
+        </div>
+        <input type="file" id="image-upload" accept="image/*" multiple class="upload-btn">
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
