@@ -33,7 +33,7 @@ header {
   background: #051928;
 }
 
-/* Grid container: 28x24 cells, each 16px x 16px */
+/* Grid container: 25x21 cells, each 16px x 16px */
 #grid-container {
   display: grid;
   grid-template-columns: repeat(25, 16px);
