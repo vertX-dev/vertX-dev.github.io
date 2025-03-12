@@ -188,10 +188,10 @@ header {
 /* Larger grid on desktop screens */
 @media(min-width: 992px) {
   #grid-container {
-    grid-template-columns: repeat(16, 40px);
-    grid-template-rows: repeat(16, 40px);
-    width: calc(16 * 40px);
-    height: calc(16 * 40px);
+    grid-template-columns: repeat(16, 41px);
+    grid-template-rows: repeat(16, 41px);
+    width: calc(16 * 41px);
+    height: calc(16 * 41px);
   }
 }
 
