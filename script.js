@@ -233,7 +233,5 @@ generateButton.addEventListener('click', () => {
       hasImage: cell.innerHTML.trim() !== ''
     });
   }
-  //let generateUI = JSON.stringify(matrix, null, 2);
-  //alert('Matrix: ' + generateUI));
   alert('Matrix: ' + JSON.stringify(matrix, null, 2));
 });
