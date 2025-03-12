@@ -76,7 +76,7 @@ header {
 #gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, 44px);
-  gap: 8px;
+  gap: 9px;
   margin-bottom: 20px;
 }
 
@@ -99,9 +99,9 @@ header {
 
 .upload-btn {
   width: 100%;
-  padding: 15px;
+  padding: 8px;
   background-color: #28a745; /* Lime green */
-  color: #218838;
+  color: white;
   border: none;
   border-radius: 2px;
   cursor: pointer;
@@ -120,7 +120,7 @@ header {
   background-color: #28a745; /* Lime green */
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 3px;
   cursor: pointer;
   text-align: center;
   transition: background-color 0.6s ease, transform 0.6s ease;
@@ -140,6 +140,7 @@ header {
 
 /* Generate button hover animation */
 #generate-button {
+  background-color: green;
   transition: transform 0.3s ease;
 }
 
