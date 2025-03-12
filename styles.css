@@ -17,7 +17,7 @@ body, html {
 header {
   background: rgba(30, 30, 30, 0.9);
   color: white;
-  padding: 10px;
+  padding: 8px;
   text-align: center;
   font-size: 1.5em;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -75,17 +75,17 @@ header {
 /* Gallery grid styling */
 #gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 50px);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, 44px);
+  gap: 8px;
   margin-bottom: 20px;
 }
 
 #gallery img {
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
   object-fit: cover;
   cursor: pointer;
-  border: 3px solid transparent;
+  border: 2px solid transparent;
   transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
@@ -99,9 +99,9 @@ header {
 
 .upload-btn {
   width: 100%;
-  padding: 10px;
+  padding: 15px;
   background-color: #28a745; /* Lime green */
-  color: white;
+  color: #218838;
   border: none;
   border-radius: 2px;
   cursor: pointer;
@@ -115,7 +115,7 @@ header {
 /* Button styling */
 .button {
   width: 75%;
-  padding: 20px;
+  padding: 25px;
   margin: 7px 1%;
   background-color: #28a745; /* Lime green */
   color: white;
@@ -180,17 +180,17 @@ header {
   }
   /* Push grid lower on mobile */
   .grid-wrapper {
-    padding-top: 20px; 
+    padding-top: 30px; 
   }
 }
 
 /* Larger grid on desktop screens */
 @media(min-width: 992px) {
   #grid-container {
-    grid-template-columns: repeat(25, 20px);
-    grid-template-rows: repeat(21, 20px);
-    width: calc(25 * 20px);
-    height: calc(21 * 20px);
+    grid-template-columns: repeat(16, 40px);
+    grid-template-rows: repeat(16, 40px);
+    width: calc(16 * 40px);
+    height: calc(16 * 40px);
   }
 }
 
