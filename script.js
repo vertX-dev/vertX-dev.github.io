@@ -233,5 +233,5 @@ generateButton.addEventListener('click', () => {
       hasImage: cell.innerHTML.trim() !== ''
     });
   }
-  alert('Matrix:', matrix);
+  alert('Matrix: ' + JSON.stringify(matrix, null, 2));
 });
