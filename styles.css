@@ -107,6 +107,7 @@ h3 {
 #grid-canvas {
   display: block;
   cursor: pointer;
+  transition: none;
 }
 
 /* Coordinate controls */
