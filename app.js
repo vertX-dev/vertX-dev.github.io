@@ -141,15 +141,56 @@ function updateSquare(row, col, mode, toggle = false) {
     return; // Out of bounds
   }
   
-  // If toggle is true, toggle between the current mode and 0 (none)
+  // Get the current value
+  const currentValue = matrix[row][col];
+  
+  // Determine the new value
+  let newValue;
   if (toggle) {
-    matrix[row][col] = matrix[row][col] === mode ? 0 : mode;
+    newValue = currentValue === mode ? 0 : mode;
   } else {
-    matrix[row][col] = mode;
+    newValue = mode;
   }
   
-  // Redraw the grid
-  drawGrid();
+  // If the value hasn't changed, return early
+  if (currentValue === newValue) {
+    return;
+  }
+  
+  // Update the matrix
+  matrix[row][col] = newValue;
+  
+  // Instead of redrawing the entire grid, just update this specific cell
+  const canvas = document.getElementById('grid-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Calculate position
+  const x = col * SQUARE_SIZE;
+  const y = row * SQUARE_SIZE;
+  
+  // Clear the cell
+  ctx.clearRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+  
+  // If the new value is not 0, fill with the appropriate color
+  if (newValue > 0) {
+    ctx.fillStyle = colorData[newValue].fill;
+    ctx.fillRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+  }
+  
+  // Redraw grid lines for this cell
+  ctx.beginPath();
+  ctx.strokeStyle = GRID_COLOR;
+  ctx.lineWidth = GRID_LINE_WIDTH;
+  
+  // Draw cell border
+  ctx.strokeRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+  
+  // Only redraw the full grid if this cell is at the center or if offset indicator would be affected
+  const centerRow = Math.floor(ROWS / 2);
+  const centerCol = Math.floor(COLS / 2);
+  if (row === centerRow && col === centerCol) {
+    drawOffsetIndicator(ctx);
+  }
 }
 
 // Show an alert modal
@@ -195,9 +236,9 @@ function getPreviewContent() {
       const value = matrix[row][col];
       if (value > 0 && colorData[value].template) {
         // Calculate the actual coordinates with offsets
-        const x = col + (xOffset * -1);
+        const x = col + xOffset;
         const y = 0; // Y is always 0 for 2D grid
-        const z = row + (zOffset * -1);
+        const z = row + zOffset;
         
         // Replace placeholders in the template
         const command = colorData[value].template
@@ -323,12 +364,54 @@ function setupEventListeners() {
   
   xOffsetInput.addEventListener('change', () => {
     xOffset = parseInt(xOffsetInput.value) || 0;
-    drawGrid();
+    // Only update the offset indicator instead of redrawing the entire grid
+    const canvas = document.getElementById('grid-canvas');
+    const ctx = canvas.getContext('2d');
+    // First redraw the center cell to remove the old indicator
+    const centerRow = Math.floor(ROWS / 2);
+    const centerCol = Math.floor(COLS / 2);
+    const centerX = centerCol * SQUARE_SIZE;
+    const centerY = centerRow * SQUARE_SIZE;
+    
+    // Redraw center cell
+    ctx.clearRect(centerX, centerY, SQUARE_SIZE, SQUARE_SIZE);
+    const centerValue = matrix[centerRow][centerCol];
+    if (centerValue > 0) {
+      ctx.fillStyle = colorData[centerValue].fill;
+      ctx.fillRect(centerX, centerY, SQUARE_SIZE, SQUARE_SIZE);
+    }
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = GRID_LINE_WIDTH;
+    ctx.strokeRect(centerX, centerY, SQUARE_SIZE, SQUARE_SIZE);
+    
+    // Draw the updated offset indicator
+    drawOffsetIndicator(ctx);
   });
   
   zOffsetInput.addEventListener('change', () => {
     zOffset = parseInt(zOffsetInput.value) || 0;
-    drawGrid();
+    // Only update the offset indicator instead of redrawing the entire grid
+    const canvas = document.getElementById('grid-canvas');
+    const ctx = canvas.getContext('2d');
+    // First redraw the center cell to remove the old indicator
+    const centerRow = Math.floor(ROWS / 2);
+    const centerCol = Math.floor(COLS / 2);
+    const centerX = centerCol * SQUARE_SIZE;
+    const centerY = centerRow * SQUARE_SIZE;
+    
+    // Redraw center cell
+    ctx.clearRect(centerX, centerY, SQUARE_SIZE, SQUARE_SIZE);
+    const centerValue = matrix[centerRow][centerCol];
+    if (centerValue > 0) {
+      ctx.fillStyle = colorData[centerValue].fill;
+      ctx.fillRect(centerX, centerY, SQUARE_SIZE, SQUARE_SIZE);
+    }
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = GRID_LINE_WIDTH;
+    ctx.strokeRect(centerX, centerY, SQUARE_SIZE, SQUARE_SIZE);
+    
+    // Draw the updated offset indicator
+    drawOffsetIndicator(ctx);
   });
   
   // Select color button
