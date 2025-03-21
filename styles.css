@@ -320,3 +320,44 @@ h3 {
     height: auto;
   }
 }
+
+/* Style for the preview text */
+.preview-text {
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+/* Style for the preview text */
+.preview-text {
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+/* Style for the details and summary */
+details {
+  margin-bottom: 1em;
+  font-family: Arial, sans-serif;
+}
+
+summary {
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+details[open] summary::after {
+  content: " (click to collapse)";
+  font-weight: normal;
+  font-size: 0.9em;
+}
+
+details summary::after {
+  content: " (click to expand)";
+  font-weight: normal;
+  font-size: 0.9em;
+}
+
+details p {
+  margin-left: 1em;
+  font-size: 1em;
+}
