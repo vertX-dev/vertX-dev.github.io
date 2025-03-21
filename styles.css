@@ -103,10 +103,12 @@ h3 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
-
-#grid-canvas {
-  display: block;
-  cursor: pointer;
+#grid-canvas {  
+  display: block;  
+  cursor: pointer;  
+  transition: none;  
+  -webkit-tap-highlight-color: transparent; /* Removes blue overlay on touch devices */
+  outline: none; /* Removes the focus outline */
 }
 
 /* Coordinate controls */
