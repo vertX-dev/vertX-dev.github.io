@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Command Generator</h1>
+    </header>
+
+    <main>
+      <div class="app-container">
+        <div class="left-panel">
+          <div class="control-panel">
+            <div class="mode-section">
+              <h3>Current Mode</h3>
+              <div id="current-mode-display" class="current-mode-box">
+                <span id="mode-name">None</span>
+                <div id="mode-color" class="color-square"></div>
+              </div>
+              <button id="select-color-btn" class="btn">Select Color</button>
+              <button id="add-command-btn" class="btn">Add Command</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="center-panel">
+          <div class="canvas-container">
+            <canvas id="grid-canvas" width="640" height="640"></canvas>
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <div class="coordinate-controls">
+            <h3>Coordinate Offsets</h3>
+            <div class="offset-control">
+              <label for="x-offset">X Offset:</label>
+              <input type="number" id="x-offset" value="0">
+            </div>
+            <div class="offset-control">
+              <label for="z-offset">Z Offset:</label>
+              <input type="number" id="z-offset" value="0">
+            </div>
+            <div class="action-buttons">
+              <button id="preview-btn" class="btn">Preview</button>
+              <button id="save-btn" class="btn">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="select-color-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Select Color</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="color-list" class="color-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="add-command-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add Command</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="add-command-form">
+            <div class="form-group">
+              <label for="command-name">Command Name:</label>
+              <input type="text" id="command-name" required>
+            </div>
+            <div class="form-group">
+              <label for="command-color">Color (hex):</label>
+              <input type="text" id="command-color" value="#ff0000" required>
+              <div class="color-preview" id="color-preview"></div>
+            </div>
+            <div class="form-group">
+              <label for="command-template">Command Template:</label>
+              <textarea id="command-template" rows="4" required>execute positioned {x} {y} {z} run say Hello</textarea>
+              <div class="template-help">
+                <p>Use {x}, {y}, {z} as placeholders for coordinates</p>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn">Add</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="preview-modal" class="modal">
+      <div class="modal-content modal-lg">
+        <div class="modal-header">
+          <h2>Preview Commands</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <pre id="preview-content"></pre>
+          <div class="modal-actions">
+            <button id="copy-btn" class="btn">Copy to Clipboard</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="save-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Save File</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="save-form">
+            <div class="form-group">
+              <label for="file-name">File Name:</label>
+              <input type="text" id="file-name" value="commands.mcfunction" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="alert-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="alert-title">Alert</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p id="alert-message"></p>
+          <div class="modal-actions">
+            <button class="btn close-modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
