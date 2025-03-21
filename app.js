@@ -195,9 +195,9 @@ function getPreviewContent() {
       const value = matrix[row][col];
       if (value > 0 && colorData[value].template) {
         // Calculate the actual coordinates with offsets
-        const x = col + xOffset;
+        const x = col + (xOffset * -1);
         const y = 0; // Y is always 0 for 2D grid
-        const z = row + zOffset;
+        const z = row + (zOffset * -1);
         
         // Replace placeholders in the template
         const command = colorData[value].template
