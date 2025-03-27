@@ -32,8 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   addCommand("Grass", "#8BC34A", "setblock {x} {y} {z} minecraft:grass_block");
   addCommand("Stone", "#9E9E9E", "setblock {x} {y} {z} minecraft:stone");
   addCommand("Water", "#42A5F5", "setblock {x} {y} {z} minecraft:water");
-  addCommand("Redstone", "#F44336", "setblock {x} {y} {z} minecraft:redstone_block
-test {x} {z}");
+  addCommand("Redstone", "#F44336", "setblock {x} {y} {z} minecraft:redstone_block");
   
   updateCurrentModeDisplay();
 });
