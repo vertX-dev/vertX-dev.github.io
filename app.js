@@ -185,7 +185,7 @@ function addCommand(name, fill, template) {
 // Get preview content for the generated commands
 function getPreviewContent() {
   let commands = [];
-  
+
   // Loop through the matrix
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -195,22 +195,29 @@ function getPreviewContent() {
         const x = col + (xOffset * -1);
         const y = 0; // Y is always 0 for 2D grid
         const z = row + (zOffset * -1);
-        
+
         // Replace placeholders in the template
-        const command = colorData[value].template
+        let command = colorData[value].template
           .replace(/{x}/g, x)
           .replace(/{y}/g, y)
           .replace(/{z}/g, z);
-        
+
+        // Evaluate mathematical equations
+        try {
+          command = command.replace(/{math:(.+?)}/g, (_, expr) => eval(expr));
+        } catch (e) {
+          console.error("Error evaluating math expression:", e);
+        }
+
         commands.push(command);
       }
     }
   }
-  
+
   if (commands.length === 0) {
     return "# No commands to preview";
   }
-  
+
   return commands.join('\n');
 }
 
