@@ -262,19 +262,19 @@ function populateColorList() {
   });
 }
 
-// Handle canvas click
+// Handle canvas click/touch
 function handleCanvasClick(e) {
   const canvas = document.getElementById('grid-canvas');
   const rect = canvas.getBoundingClientRect();
   
-  // Calculate the grid cell from the click coordinates
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  // Calculate the grid cell from the click/touch coordinates
+  const x = (e.clientX || e.touches[0].clientX) - rect.left;
+  const y = (e.clientY || e.touches[0].clientY) - rect.top;
   
   const col = Math.floor(x / SQUARE_SIZE);
   const row = Math.floor(y / SQUARE_SIZE);
   
-  // Update the square (toggle behavior on click)
+  // Update the square (toggle behavior on click/touch)
   updateSquare(row, col, currentMode, true);
   
   // Start dragging
@@ -282,7 +282,7 @@ function handleCanvasClick(e) {
   lastCell = { row, col };
 }
 
-// Handle canvas drag
+// Handle canvas drag/touch move
 function handleCanvasDrag(e) {
   if (!isDragging) {
     return;
@@ -292,8 +292,8 @@ function handleCanvasDrag(e) {
   const rect = canvas.getBoundingClientRect();
   
   // Calculate the grid cell from the current coordinates
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const x = (e.clientX || e.touches[0].clientX) - rect.left;
+  const y = (e.clientY || e.touches[0].clientY) - rect.top;
   
   const col = Math.floor(x / SQUARE_SIZE);
   const row = Math.floor(y / SQUARE_SIZE);
