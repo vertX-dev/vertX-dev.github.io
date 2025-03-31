@@ -363,29 +363,45 @@ details p {
 }
 
 
+/* Category Tag Styling */
+.template-tag {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  padding: 5px;
+  border-bottom: 2px solid #ccc;
+}
+
+/* Optional color coding for each category */
+.normal-tag { color: #3498db; }
+.math-tag { color: #e67e22; }
+.special-target-tag { color: #9b59b6; }
+.normal-target-tag { color: #27ae60; }
+
+/* Existing Styles for Command Items */
 .copy-template-btn {
-  position: absolute; /* Fix it to the right */
-  right: 3px; /* Adjust spacing from the right */
-  top: 50%; /* Align vertically */
-  transform: translateY(-50%); /* Center vertically */
-  
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
   background-color: #3498db;
   color: white;
   border: none;
-  padding: 0.4rem 0.2rem; /* Adjust padding for better size */
-  border-radius: 5px; /* Slightly rounded edges */
+  padding: 0.4rem 0.2rem;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 0.95rem; /* Slightly larger font */
+  font-size: 0.95rem;
   transition: background-color 0.2s ease;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap;
 }
 
 .copy-template-btn:hover {
-  background-color: #2980b9; /* Slightly darker blue on hover */
+  background-color: #2980b9;
 }
 
 /* Ensure the list items are relatively positioned for absolute placement */
-#templates-list li {
+#templates-modal li {
   position: relative;
   padding: 10px;
   list-style: none;
@@ -394,17 +410,21 @@ details p {
   border-radius: 5px;
   display: flex;
   align-items: center;
-  padding-right: 50px; /* Prevent text from overlapping the button */
+  padding-right: 50px;
 }
-#templates-list code {
-  flex-grow: 1; /* Allow command text to take available space */
+
+/* Command Code Styling */
+#templates-modal code {
+  flex-grow: 1;
   font-size: 1rem;
   background: #e0e0e0;
   padding: 5px;
   border-radius: 3px;
 }
+
+/* Modal Body Styling */
 #templates-modal .modal-body {
   max-height: 135vh; /* or any desired maximum height */
   overflow-y: auto;
-  padding-right: 1rem; /* optional, ensures content doesn't touch the scrollbar */
+  padding-right: 1rem; /* ensures content doesn't touch the scrollbar */
 }
