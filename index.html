@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Command Generator</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
+    <!-- Header Section -->
     <header>
       <h1>Minecraft Advanced Hitbox Function Generator</h1>
       <details>
         <summary>Info</summary>
-        <p>Create powerful Minecraft functions with precise hitboxes using our intuitive tool. Easily draw custom hitboxes and assign multi-line commands to different colors for better organization. Take full control over positioning with player-relative offsets and even integrate dynamic calculations using {math:} in your commands. Save your work, preview hitboxes in real time, and generate optimized function files effortlessly. Whether you're designing combat skills, spell effects, or complex command-based mechanics, our tool streamlines the process for you.</p>
+        <p>
+          Create powerful Minecraft functions with precise hitboxes using our intuitive tool. Easily draw custom hitboxes and assign multi-line commands to different colors for better organization. Take full control over positioning with player-relative offsets and even integrate dynamic calculations using {math:} in your commands. Save your work, preview hitboxes in real time, and generate optimized function files effortlessly. Whether you're designing combat skills, spell effects, or complex command-based mechanics, our tool streamlines the process for you.
+        </p>
       </details>
     </header>
 
+    <!-- Main Application Section -->
     <main>
       <div class="app-container">
+        <!-- Left Panel: Controls -->
         <div class="left-panel">
           <div class="control-panel">
             <div class="mode-section">
@@ -31,24 +36,26 @@
             </div>
           </div>
         </div>
-        
+
+        <!-- Center Panel: Canvas -->
         <div class="center-panel">
           <div class="canvas-container">
             <canvas id="grid-canvas" width="640" height="640"></canvas>
           </div>
         </div>
 
+        <!-- Right Panel: Coordinate Controls -->
         <div class="right-panel">
           <div class="coordinate-controls">
             <h3>Coordinate Offsets</h3>
             <h4>By default player positioned in top left corner</h4>
             <div class="offset-control">
               <label for="x-offset">X Offset:</label>
-              <input type="number" id="x-offset" value="0">
+              <input type="number" id="x-offset" value="0" />
             </div>
             <div class="offset-control">
               <label for="z-offset">Z Offset:</label>
-              <input type="number" id="z-offset" value="0">
+              <input type="number" id="z-offset" value="0" />
             </div>
             <div class="action-buttons">
               <button id="preview-btn" class="btn">Preview</button>
@@ -59,7 +66,9 @@
       </div>
     </main>
 
-    <!-- Modals -->
+    <!-- Modals Section -->
+
+    <!-- Select Color Modal -->
     <div id="select-color-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -72,6 +81,7 @@
       </div>
     </div>
 
+    <!-- Add Command Modal -->
     <div id="add-command-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -82,14 +92,15 @@
           <form id="add-command-form">
             <div class="form-group">
               <label for="command-name">Command Name:</label>
-              <input type="text" id="command-name" required>
+              <input type="text" id="command-name" required />
             </div>
             <div class="form-group">
               <label for="command-color">Color (hex):</label>
-              <input type="text" id="command-color" value="#" required>
+              <input type="text" id="command-color" value="#" required />
               <div class="color-preview" id="color-preview"></div>
             </div>
             <div class="form-group">
+              <button id="templates-btn" class="btn" type="button">Templates</button>
               <label for="command-template">Command Template:</label>
               <textarea id="command-template" rows="4" required></textarea>
               <div class="template-help">
@@ -98,13 +109,13 @@
             </div>
             <div class="form-actions">
               <button type="submit" class="btn">Add</button>
-              <button id="templates-btn" class="btn">Templates</button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
+    <!-- Preview Modal -->
     <div id="preview-modal" class="modal">
       <div class="modal-content modal-lg">
         <div class="modal-header">
@@ -120,6 +131,7 @@
       </div>
     </div>
 
+    <!-- Save Modal -->
     <div id="save-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -130,7 +142,7 @@
           <form id="save-form">
             <div class="form-group">
               <label for="file-name">File Name:</label>
-              <input type="text" id="file-name" value="commands.mcfunction" required>
+              <input type="text" id="file-name" value="commands.mcfunction" required />
             </div>
             <div class="form-actions">
               <button type="submit" class="btn">Save</button>
@@ -139,7 +151,163 @@
         </div>
       </div>
     </div>
+    
+        <!-- Templates Modal with Headers for Each Template -->
+    <div id="templates-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Command Templates</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <ul id="templates-list">
+            <!-- Normal Commands Category -->
+            <li class="template-tag normal-tag">Normal Commands</li>
+            <li>
+              <div class="template-header"><strong>Say Hello</strong></div>
+              <code>say Hello Minecraft</code>
+              <button class="copy-template-btn" data-template="say Hello Minecraft">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Give Diamond</strong></div>
+              <code>give @p minecraft:diamond 1</code>
+              <button class="copy-template-btn" data-template="give @p minecraft:diamond 1">Copy</button>
+            </li>
+            <!-- 5 additional Normal Commands -->
+            <li>
+              <div class="template-header"><strong>Teleport Up</strong></div>
+              <code>tp @p ~ ~1 ~</code>
+              <button class="copy-template-btn" data-template="tp @p ~ ~1 ~">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Set Time to Day</strong></div>
+              <code>time set day</code>
+              <button class="copy-template-btn" data-template="time set day">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Clear Weather</strong></div>
+              <code>weather clear</code>
+              <button class="copy-template-btn" data-template="weather clear">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Apply Speed Effect</strong></div>
+              <code>effect @p speed 30 1</code>
+              <button class="copy-template-btn" data-template="effect @p speed 30 1">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Switch to Creative</strong></div>
+              <code>gamemode creative @p</code>
+              <button class="copy-template-btn" data-template="gamemode creative @p">Copy</button>
+            </li>
+    
+            <!-- Math Commands Category -->
+            <li class="template-tag math-tag">Math Commands</li>
+            <li>
+              <div class="template-header"><strong>Armor Stand Math</strong></div>
+              <code>summon minecraft:armor_stand {math:Math.floor(1.5)} 64 {x}</code>
+              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.floor(1.5)} 64 {x}">Copy</button>
+            </li>
+            <!-- 5 additional Math Commands -->
+            <li>
+              <div class="template-header"><strong>Armor Stand Math Ceiling</strong></div>
+              <code>summon minecraft:armor_stand {math:Math.ceil(1.5)} 64 {x}</code>
+              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.ceil(1.5)} 64 {x}">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Armor Stand Math Round</strong></div>
+              <code>summon minecraft:armor_stand {math:Math.round(2.7)} 64 {x}</code>
+              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.round(2.7)} 64 {x}">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Armor Stand Math Max</strong></div>
+              <code>summon minecraft:armor_stand {math:Math.max(1,2)} 64 {x}</code>
+              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.max(1,2)} 64 {x}">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Armor Stand Math Min</strong></div>
+              <code>summon minecraft:armor_stand {math:Math.min(1,2)} 64 {x}</code>
+              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.min(1,2)} 64 {x}">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Armor Stand Math Random</strong></div>
+              <code>summon minecraft:armor_stand {math:Math.floor(Math.random()*10)} 64 {x}</code>
+              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.floor(Math.random()*10)} 64 {x}">Copy</button>
+            </li>
+    
+            <!-- Special Target Commands Category -->
+            <li class="template-tag special-target-tag">Special Target Commands</li>
+            <li>
+              <div class="template-header"><strong>Special Target</strong></div>
+              <code>execute as @e[Special target] if score @s health matches ..0 run say Dead</code>
+              <button class="copy-template-btn" data-template="execute as @e[Special target] if score @s health matches ..0 run say Dead">Copy</button>
+            </li>
+            <!-- 5 additional Special Target Commands -->
+            <li>
+              <div class="template-header"><strong>Charged Creeper Alert</strong></div>
+              <code>execute as @e[type=creeper,tag=charged] run say Charged Creeper</code>
+              <button class="copy-template-btn" data-template="execute as @e[type=creeper,tag=charged] run say Charged Creeper">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Aggressive Zombie Warning</strong></div>
+              <code>execute as @e[type=zombie,tag=aggressive] run say Beware Zombie</code>
+              <button class="copy-template-btn" data-template="execute as @e[type=zombie,tag=aggressive] run say Beware Zombie">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Custom Target Activate</strong></div>
+              <code>execute as @e[CustomTarget] run say Custom target activated</code>
+              <button class="copy-template-btn" data-template="execute as @e[CustomTarget] run say Custom target activated">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Elite Skeleton Alert</strong></div>
+              <code>execute as @e[type=skeleton,tag=elite] run say Elite Skeleton</code>
+              <button class="copy-template-btn" data-template="execute as @e[type=skeleton,tag=elite] run say Elite Skeleton">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>VIP Player Notice</strong></div>
+              <code>execute as @e[type=player,tag=VIP] run say VIP player here</code>
+              <button class="copy-template-btn" data-template="execute as @e[type=player,tag=VIP] run say VIP player here">Copy</button>
+            </li>
+    
+            <!-- Normal Target Commands Category -->
+            <li class="template-tag normal-target-tag">Normal Target Commands</li>
+            <li>
+              <div class="template-header"><strong>Normal Target</strong></div>
+              <code>execute positioned ^1 ^ ^-1 run say Normal Target</code>
+              <button class="copy-template-btn" data-template="execute positioned ^1 ^ ^-1 run say Normal Target">Copy</button>
+            </li>
+            <!-- 5 additional Normal Target Commands -->
+            <li>
+              <div class="template-header"><strong>Teleport to Block</strong></div>
+              <code>execute as @p positioned 0 64 0 run tp @s ~ ~ ~</code>
+              <button class="copy-template-btn" data-template="execute as @p positioned 0 64 0 run tp @s ~ ~ ~">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Summon Cow</strong></div>
+              <code>execute positioned ~ ~ ~ run summon minecraft:cow</code>
+              <button class="copy-template-btn" data-template="execute positioned ~ ~ ~ run summon minecraft:cow">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Drop Apple</strong></div>
+              <code>execute positioned ^ ^ ^ run give @p minecraft:apple 1</code>
+              <button class="copy-template-btn" data-template="execute positioned ^ ^ ^ run give @p minecraft:apple 1">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Set Stone Block</strong></div>
+              <code>execute positioned ^1 ^ ^ run setblock ~ ~ ~ minecraft:stone</code>
+              <button class="copy-template-btn" data-template="execute positioned ^1 ^ ^ run setblock ~ ~ ~ minecraft:stone">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Particle Effect</strong></div>
+              <code>execute positioned ^ ^ ^ run particle minecraft:happy_villager ~ ~ ~ 0 0 0 0 1</code>
+              <button class="copy-template-btn" data-template="execute positioned ^ ^ ^ run particle minecraft:happy_villager ~ ~ ~ 0 0 0 0 1">Copy</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
 
+    
+    <!-- Alert Modal -->
     <div id="alert-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
