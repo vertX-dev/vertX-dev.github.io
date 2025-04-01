@@ -1,70 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Meta information for search engines, social media, and responsiveness -->
   <meta charset="UTF-8" />
-  <meta name="description" content="Easily create custom Minecraft Bedrock function files with our online generator.">
-  <meta name="keywords" content="Minecraft, Bedrock, Function Generator, Commands, Scripting">
-  <meta name="author" content="vertX">
-  <meta name="robots" content="index, follow">
-  <meta property="og:title" content="Function Generator">
-  <meta property="og:description" content="Easily create and download custom function files for Minecraft Bedrock Edition.">
-  <meta property="og:url" content="https://vertx-dev.github.io/">
-  <meta property="og:type" content="website">
+  <meta name="description" content="Easily create custom Minecraft Bedrock function files with our online generator. Use our tool to draw hitboxes, assign commands, and preview your work." />
+  <meta name="keywords" content="Minecraft, Bedrock, Function Generator, Commands, Scripting, Hitbox, Advanced" />
+  <meta name="author" content="vertX" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Function Generator" />
+  <meta property="og:description" content="Create and download custom function files for Minecraft Bedrock Edition with our advanced tool that supports hitboxes and dynamic commands." />
+  <meta property="og:url" content="https://vertx-dev.github.io/" />
+  <meta property="og:type" content="website" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Function Generator</title>
+  <!-- Link to the stylesheet for page styling -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
-    <!-- Header Section -->
+    <!-- Header Section: Introduction and Overview -->
     <header>
       <h1>Minecraft Advanced Hitbox Function Generator</h1>
+      <!-- Expandable information about what the tool does -->
       <details>
         <summary>Info</summary>
         <p>
-          Create powerful Minecraft functions with precise hitboxes using our intuitive tool. Easily draw custom hitboxes and assign multi-line commands to different colors for better organization. Take full control over positioning with player-relative offsets and even integrate dynamic calculations using {math:} in your commands. Save your work, preview hitboxes in real time, and generate optimized function files effortlessly. Whether you're designing combat skills, spell effects, or complex command-based mechanics, our tool streamlines the process for you.
+          This tool allows you to create powerful Minecraft functions by drawing precise hitboxes and assigning commands with color-coded organization. Customize your commands with multi-line inputs, player-relative positioning, and even dynamic calculations using the {math:} syntax. Ideal for designing combat skills, spell effects, or other complex command-based mechanics, this generator streamlines the process and lets you preview your work in real time.
         </p>
       </details>
     </header>
 
-    <!-- Main Application Section -->
+    <!-- Main Application Section: Core functionality of the tool -->
     <main>
+      <!-- Mobile toggle for enabling draggable elements on smaller screens -->
+      <div>
+        <label class="switch-mobile">
+          <input type="checkbox" id="switch-mobile-pc">
+          <span class="slider"></span>
+          <span class="switch-text">DRAGGABLE</span>
+        </label>
+      </div>
       <div class="app-container">
-        <!-- Left Panel: Controls -->
+        <!-- Left Panel: Control Panel for Modes and Commands -->
         <div class="left-panel">
           <div class="control-panel">
             <div class="mode-section">
               <h3>Current Mode</h3>
+              <!-- Displays the current mode and associated color -->
               <div id="current-mode-display" class="current-mode-box">
                 <span id="mode-name">None</span>
                 <div id="mode-color" class="color-square"></div>
               </div>
+              <!-- Button to open the color selection modal -->
               <button id="select-color-btn" class="btn">Select Color</button>
+              <!-- Button to open the add command modal -->
               <button id="add-command-btn" class="btn">Add Command</button>
             </div>
           </div>
         </div>
 
-        <!-- Center Panel: Canvas -->
+        <!-- Center Panel: Canvas Area for Hitbox Drawing -->
         <div class="center-panel">
           <div class="canvas-container">
+            <!-- The canvas element where users can draw and manipulate hitboxes -->
             <canvas id="grid-canvas" width="640" height="640"></canvas>
           </div>
         </div>
 
-        <!-- Right Panel: Coordinate Controls -->
+        <!-- Right Panel: Coordinate Controls for Positioning -->
         <div class="right-panel">
           <div class="coordinate-controls">
             <h3>Coordinate Offsets</h3>
-            <h4>By default player positioned in top left corner</h4>
+            <h4>By default, the player is positioned in the top left corner.</h4>
+            <!-- Input for adjusting the X offset -->
             <div class="offset-control">
               <label for="x-offset">X Offset:</label>
               <input type="number" id="x-offset" value="0" />
             </div>
+            <!-- Input for adjusting the Z offset -->
             <div class="offset-control">
               <label for="z-offset">Z Offset:</label>
               <input type="number" id="z-offset" value="0" />
             </div>
+            <!-- Buttons for previewing and saving the configuration -->
             <div class="action-buttons">
               <button id="preview-btn" class="btn">Preview</button>
               <button id="save-btn" class="btn">Save</button>
@@ -74,9 +92,9 @@
       </div>
     </main>
 
-    <!-- Modals Section -->
+    <!-- Modals Section: Additional pop-up windows for user interaction -->
 
-    <!-- Select Color Modal -->
+    <!-- Select Color Modal: Allows users to choose a color for commands or hitboxes -->
     <div id="select-color-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -84,12 +102,13 @@
           <span class="close-modal">&times;</span>
         </div>
         <div class="modal-body">
+          <!-- Grid of color options dynamically generated -->
           <div id="color-list" class="color-grid"></div>
         </div>
       </div>
     </div>
 
-    <!-- Add Command Modal -->
+    <!-- Add Command Modal: Form for adding new commands with custom settings -->
     <div id="add-command-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -98,24 +117,33 @@
         </div>
         <div class="modal-body">
           <form id="add-command-form">
+            <!-- Command Name input -->
             <div class="form-group">
               <label for="command-name">Command Name:</label>
               <input type="text" id="command-name" required />
             </div>
+            <!-- Color input for the command, including live preview -->
             <div class="form-group">
               <label for="command-color">Color (hex):</label>
-              <input type="text" id="command-color" value="#" required />
-              <div class="color-preview" id="color-preview"></div>
+              <div class="form-group" id="color-group">
+                <input type="text" id="command-color" value="#" required />
+                <div>
+                  <button class="color-preview" id="color-preview"></button>
+                </div>
+              </div>
             </div>
+            <!-- Command Template section with instructions for using placeholders -->
             <div class="form-group">
-              <button id="templates-btn" class="btn" type="button">Templates</button>
+              
               <label for="command-template">Command Template:</label>
               <textarea id="command-template" rows="4" required></textarea>
               <div class="template-help">
-                <p>Use {x}, {y}, {z} as placeholders for coordinates</p>
+                <p>Use {x}, {y}, {z} as placeholders for coordinates.</p>
               </div>
             </div>
+            <!-- Submit button for adding the command -->
             <div class="form-actions">
+              <button id="templates-btn" class="btn" type="button">Templates</button>
               <button type="submit" class="btn">Add</button>
             </div>
           </form>
@@ -123,7 +151,7 @@
       </div>
     </div>
 
-    <!-- Preview Modal -->
+    <!-- Preview Modal: Shows a preview of the generated commands for review -->
     <div id="preview-modal" class="modal">
       <div class="modal-content modal-lg">
         <div class="modal-header">
@@ -131,6 +159,7 @@
           <span class="close-modal">&times;</span>
         </div>
         <div class="modal-body">
+          <!-- Preformatted text area displaying command output -->
           <pre id="preview-content"></pre>
           <div class="modal-actions">
             <button id="copy-btn" class="btn">Copy to Clipboard</button>
@@ -139,7 +168,7 @@
       </div>
     </div>
 
-    <!-- Save Modal -->
+    <!-- Save Modal: Provides an interface to name and download the generated function file -->
     <div id="save-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -160,7 +189,7 @@
       </div>
     </div>
     
-        <!-- Templates Modal with Headers for Each Template -->
+    <!-- Templates Modal: Lists predefined command templates categorized by type -->
     <div id="templates-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -168,6 +197,7 @@
           <span class="close-modal">&times;</span>
         </div>
         <div class="modal-body">
+          <!-- List of available command templates organized by categories -->
           <ul id="templates-list">
             <!-- Normal Commands Category -->
             <li class="template-tag normal-tag">Normal Commands</li>
@@ -181,7 +211,6 @@
               <code>give @p minecraft:diamond 1</code>
               <button class="copy-template-btn" data-template="give @p minecraft:diamond 1">Copy</button>
             </li>
-            <!-- 5 additional Normal Commands -->
             <li>
               <div class="template-header"><strong>Teleport Up</strong></div>
               <code>tp @p ~ ~1 ~</code>
@@ -215,7 +244,6 @@
               <code>summon minecraft:armor_stand {math:Math.floor(1.5)} 64 {x}</code>
               <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.floor(1.5)} 64 {x}">Copy</button>
             </li>
-            <!-- 5 additional Math Commands -->
             <li>
               <div class="template-header"><strong>Armor Stand Math Ceiling</strong></div>
               <code>summon minecraft:armor_stand {math:Math.ceil(1.5)} 64 {x}</code>
@@ -249,7 +277,6 @@
               <code>execute as @e[Special target] if score @s health matches ..0 run say Dead</code>
               <button class="copy-template-btn" data-template="execute as @e[Special target] if score @s health matches ..0 run say Dead">Copy</button>
             </li>
-            <!-- 5 additional Special Target Commands -->
             <li>
               <div class="template-header"><strong>Charged Creeper Alert</strong></div>
               <code>execute as @e[type=creeper,tag=charged] run say Charged Creeper</code>
@@ -283,7 +310,6 @@
               <code>execute positioned ^1 ^ ^-1 run say Normal Target</code>
               <button class="copy-template-btn" data-template="execute positioned ^1 ^ ^-1 run say Normal Target">Copy</button>
             </li>
-            <!-- 5 additional Normal Target Commands -->
             <li>
               <div class="template-header"><strong>Teleport to Block</strong></div>
               <code>execute as @p positioned 0 64 0 run tp @s ~ ~ ~</code>
@@ -314,8 +340,7 @@
       </div>
     </div>
 
-    
-    <!-- Alert Modal -->
+    <!-- Alert Modal: Provides notifications or alerts to the user -->
     <div id="alert-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -323,6 +348,7 @@
           <span class="close-modal">&times;</span>
         </div>
         <div class="modal-body">
+          <!-- Alert message placeholder -->
           <p id="alert-message"></p>
           <div class="modal-actions">
             <button class="btn close-modal">OK</button>
@@ -332,6 +358,7 @@
     </div>
   </div>
 
+  <!-- Link to the main application JavaScript file that controls behavior -->
   <script src="app.js"></script>
 </body>
 </html>
