@@ -13,7 +13,7 @@ let xOffset = 0;
 let zOffset = 0;
 let isDragging = false;
 let lastCell = null;
-
+//let mobile = "checked";
 // Color data for different commands
 const colorData = {
   0: {
@@ -264,6 +264,9 @@ function populateColorList() {
 
 // Handle canvas click
 function handleCanvasClick(e) {
+  if (mobile == "checked") {
+    return;
+  }
   const canvas = document.getElementById('grid-canvas');
   const rect = canvas.getBoundingClientRect();
 
@@ -284,7 +287,7 @@ function handleCanvasClick(e) {
 
 // Handle canvas drag
 function handleCanvasDrag(e) {
-  if (!isDragging) {
+  if (!isDragging || mobile == "checked") {
     return;
   }
 
@@ -311,6 +314,8 @@ function handleCanvasDrag(e) {
 }
 
 function setupEventListeners() {
+  let mobile;
+  setupControl();
   setupCanvasEvents();
   setupOffsetInputs();
   setupColorSelection();
@@ -319,13 +324,69 @@ function setupEventListeners() {
   setupSave();
   setupModalCloseHandlers();
   setupTemplatesModal();
+  setupControl();
 }
 
+function handleCanvasClickm(e) {
+  if (mobile == "unchecked") {
+    return;
+  }
+  
+  const canvas = document.getElementById('grid-canvas');
+  const rect = canvas.getBoundingClientRect();
+
+  // Calculate the grid cell from the click/touch coordinates
+  const x = (e.clientX || e.touches[0].clientX) - rect.left;
+  const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+  const col = Math.floor(x / SQUARE_SIZE);
+  const row = Math.floor(y / SQUARE_SIZE);
+
+  // Update the square (toggle behavior on click/touch)
+  updateSquare(row, col, currentMode, true);
+
+  // Start dragging
+  isDragging = true;
+  lastCell = { row, col };
+}
+function handleCanvasDragm(e) {
+  if (!isDragging || mobile == "unchecked") {
+    return;
+  }
+
+  const canvas = document.getElementById('grid-canvas');
+  const rect = canvas.getBoundingClientRect();
+
+  // Calculate the grid cell from the current coordinates
+  const x = (e.clientX || e.touches[0].clientX) - rect.left;
+  const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+  const col = Math.floor(x / SQUARE_SIZE);
+  const row = Math.floor(y / SQUARE_SIZE);
+
+  // Skip if we're still on the same cell
+  if (lastCell && lastCell.row === row && lastCell.col === col) {
+    return;
+  }
+
+  // Update the square (no toggle during drag)
+  updateSquare(row, col, currentMode, false);
+
+  // Update last cell
+  lastCell = { row, col };
+}
 function setupCanvasEvents() {
   const canvas = document.getElementById('grid-canvas');
   canvas.addEventListener('mousedown', handleCanvasClick);
   canvas.addEventListener('mousemove', handleCanvasDrag);
   window.addEventListener('mouseup', () => {
+    isDragging = false;
+    lastCell = null;
+  });
+  
+  canvas.addEventListener('touchstart', handleCanvasClickm);
+  canvas.addEventListener('touchmove', handleCanvasDragm);
+  window.addEventListener('touchend', () => {
     isDragging = false;
     lastCell = null;
   });
@@ -384,6 +445,17 @@ function setupAddCommand() {
     };
     colorInput.addEventListener('input', updatePreview);
     updatePreview(); // Initial update
+  });
+  
+  colorPreview.addEventListener('click', (e) => {
+    const randomColor = () => {
+        return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
+      };
+
+    const newColor = randomColor();
+    colorPreview.style.backgroundColor = newColor;
+    colorInput.value = newColor;
+    e.preventDefault();
   });
 
   addCommandForm.addEventListener('submit', (e) => {
@@ -535,5 +607,13 @@ function setupTemplatesModal() {
       // Optionally close the modal after selection
       templatesModal.style.display = 'none';
     });
+  });
+}
+
+function setupControl() {
+  const controlButton = document.getElementById('switch-mobile-pc');
+  mobile = controlButton.checked ? controlButton.value : "unchecked";
+  controlButton.addEventListener('change', () => {
+    mobile = controlButton.checked ? controlButton.value : "unchecked";
   });
 }
