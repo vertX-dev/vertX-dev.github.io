@@ -91,10 +91,10 @@ function drawGrid() {
   ctx.stroke();
 
   // Draw the offset indicator
-  drawOffsetIndicator(ctx);
+  //drawOffsetIndicator(ctx);
 }
 
-// Draw the offset indicator in the grid
+/* Draw the offset indicator in the grid
 function drawOffsetIndicator(ctx) {
   const centerRow = Math.floor(ROWS / 2);
   const centerCol = Math.floor(COLS / 2);
@@ -122,7 +122,7 @@ function drawOffsetIndicator(ctx) {
 
   ctx.restore();
 }
-
+*/
 // Update the current mode display
 function updateCurrentModeDisplay() {
   const modeNameElement = document.getElementById('mode-name');
@@ -264,7 +264,7 @@ function populateColorList() {
 
 // Handle canvas click
 function handleCanvasClick(e) {
-  if (mobile == "checked") {
+  if (mobile == "checked" || moveGrid == "on") {
     return;
   }
   const canvas = document.getElementById('grid-canvas');
@@ -287,7 +287,7 @@ function handleCanvasClick(e) {
 
 // Handle canvas drag
 function handleCanvasDrag(e) {
-  if (!isDragging || mobile == "checked") {
+  if (!isDragging || mobile == "checked" || moveGrid == "on") {
     return;
   }
 
@@ -313,22 +313,9 @@ function handleCanvasDrag(e) {
   lastCell = { row, col };
 }
 
-function setupEventListeners() {
-  let mobile;
-  setupControl();
-  setupCanvasEvents();
-  setupOffsetInputs();
-  setupColorSelection();
-  setupAddCommand();
-  setupPreview();
-  setupSave();
-  setupModalCloseHandlers();
-  setupTemplatesModal();
-  setupControl();
-}
-
+//mobile version
 function handleCanvasClickm(e) {
-  if (mobile == "unchecked") {
+  if (mobile == "unchecked" || moveGrid == "on") {
     return;
   }
   
@@ -350,7 +337,7 @@ function handleCanvasClickm(e) {
   lastCell = { row, col };
 }
 function handleCanvasDragm(e) {
-  if (!isDragging || mobile == "unchecked") {
+  if (!isDragging || mobile == "unchecked" || moveGrid == "on") {
     return;
   }
 
@@ -375,6 +362,22 @@ function handleCanvasDragm(e) {
   // Update last cell
   lastCell = { row, col };
 }
+
+function setupEventListeners() {
+  let mobile;
+  let moveGrid;
+  setupControl();
+  setupCanvasEvents();
+  setupOffsetInputs();
+  setupColorSelection();
+  setupAddCommand();
+  setupPreview();
+  setupSave();
+  setupModalCloseHandlers();
+  setupTemplatesModal();
+  setupControl();
+}
+
 function setupCanvasEvents() {
   const canvas = document.getElementById('grid-canvas');
   canvas.addEventListener('mousedown', handleCanvasClick);
@@ -612,8 +615,20 @@ function setupTemplatesModal() {
 
 function setupControl() {
   const controlButton = document.getElementById('switch-mobile-pc');
+  const moveControlBtn = document.getElementById('move-grid');
+  
+  //Dragging setup
   mobile = controlButton.checked ? controlButton.value : "unchecked";
   controlButton.addEventListener('change', () => {
     mobile = controlButton.checked ? controlButton.value : "unchecked";
+  });
+  
+  //Move on screen setup
+  moveGrid = moveControlBtn.checked ? "on" : "off";
+  moveControlBtn.addEventListener('change', () => {
+    moveGrid = moveControlBtn.checked ? "on" : "off";
+    const canvasMovingElement = document.getElementById('grid-canvas');
+    canvasMovingElement.style.touchAction = moveControlBtn.checked ? "auto" : "none";
+    
   });
 }
