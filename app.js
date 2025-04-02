@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
 
   // Add default colors/commands
-  addCommand("Water", "#42A5F5", "setblock {x} {y} {z} minecraft:water");
+  addCommand("Lightning", "#e9ef8b", "summon lightning_bolt ~{x} ~{y} ~{z}");
 
   updateCurrentModeDisplay();
 });
