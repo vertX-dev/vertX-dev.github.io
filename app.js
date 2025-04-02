@@ -91,10 +91,10 @@ function drawGrid() {
   ctx.stroke();
 
   // Draw the offset indicator
-  //drawOffsetIndicator(ctx);
+  drawOffsetIndicator(ctx);
 }
 
-/* Draw the offset indicator in the grid
+//Draw the offset indicator in the grid
 function drawOffsetIndicator(ctx) {
   const centerRow = Math.floor(ROWS / 2);
   const centerCol = Math.floor(COLS / 2);
@@ -122,7 +122,6 @@ function drawOffsetIndicator(ctx) {
 
   ctx.restore();
 }
-*/
 // Update the current mode display
 function updateCurrentModeDisplay() {
   const modeNameElement = document.getElementById('mode-name');
