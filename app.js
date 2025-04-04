@@ -4,7 +4,7 @@ const COLS = 32;
 const SQUARE_SIZE = 20;
 const GRID_COLOR = '#ddd';
 const GRID_LINE_WIDTH = 1;
-const OFFSET_INDICATOR_COLOR = '#3498db';
+const OFFSET_INDICATOR_COLOR = 'red';
 
 // Application state
 let currentMode = 0; // 0 means "eraser" mode
@@ -27,10 +27,6 @@ const colorData = {
 document.addEventListener('DOMContentLoaded', () => {
   initCanvas();
   setupEventListeners();
-
-  // Add default colors/commands
-  addCommand("Lightning", "#e9ef8b", "summon lightning_bolt ~{x} ~{y} ~{z}");
-
   updateCurrentModeDisplay();
 });
 
@@ -94,7 +90,7 @@ function drawGrid() {
   drawOffsetIndicator(ctx);
 }
 
-//Draw the offset indicator in the grid
+ //Draw the offset indicator in the grid
 function drawOffsetIndicator(ctx) {
   const centerRow = Math.floor(ROWS / 2);
   const centerCol = Math.floor(COLS / 2);
@@ -122,6 +118,7 @@ function drawOffsetIndicator(ctx) {
 
   ctx.restore();
 }
+
 // Update the current mode display
 function updateCurrentModeDisplay() {
   const modeNameElement = document.getElementById('mode-name');
@@ -195,17 +192,114 @@ function getPreviewContent() {
         const y = 0; // Y is always 0 for 2D grid
         const z = row + (zOffset * -1);
 
-        // Replace placeholders in the template
+        // Special functions
         let command = colorData[value].template
           .replace(/{x}/g, x)
           .replace(/{y}/g, y)
           .replace(/{z}/g, z);
 
-        // Evaluate mathematical equations
+
+        //test crouch
         try {
-          command = command.replace(/{math:(.+?)}/g, (_, expr) => eval(expr));
+          command = command.replace(/{crouch:True}/g, "execute at @s as @s positioned ~~1.5~ unless entity @s[dx=0] run");
+          command = command.replace(/{crouch:False}/g, "execute at @s as @s positioned ~~1.5~ if entity @s[dx=0] run");
         } catch (e) {
-          console.error("Error evaluating math expression:", e);
+          console.error("error in crouch test", e);
+        }
+        
+        //test water
+        try {
+          command = command.replace(/{inWater:True}/g, "execute at @s as @s if block ~~~ water run ");
+          command = command.replace(/{inWater:False}/g, "execute at @s as @s unless block ~~-1~ water unless block ~~1~ water run ");
+        } catch (e) {
+          console.error("error in crouch test", e);
+        }
+        
+        //test air
+        try {
+          command = command.replace(/{inAir:True}/g, "execute at @s as @s if block ~~-1~ air run ");
+          command = command.replace(/{inAir:False}/g, "execute at @s as @s unless block ~~-1~ air run ");
+        } catch (e) {
+          console.error("error in crouch test", e);
+        }
+        
+        //random num
+        try {
+          command = command.replace(/{random:(.+?)}/g, (_, expr) => {
+            let [min, max] = expr.split(",");
+            min = Number(min);
+            max = Number(max);
+            return Math.floor(Math.random() * (max - min) + min);
+          });
+        } catch (e) {
+          console.error("error in random test", e);
+        }
+                //Repeat
+        let rptest = 0;
+        try {
+          command = command.replace(/#repeat:(.+?)#/g, (_, expr) => {
+            let [cmd, loops, variables] = expr.split("|");
+            loops = Number(loops);
+            let result = "";
+            console.log(cmd, loops, variables, expr);
+            
+            for (let i = 0; i < loops; i++) {
+              try {
+                // Replace {i} with the current iteration number
+                let currentVariables = variables;
+                try {
+                  currentVariables = currentVariables.replace(/@i@/g, i);
+                } catch (e) {
+                  console.error("Error replacing {i}:", e);
+                }
+                
+                // Split variables string into an array
+                let varsArr = [];
+                try {
+                  varsArr = currentVariables.split(";");
+                } catch (e) {
+                  console.error("Error splitting variables:", e);
+                }
+                
+                // Replace variable placeholders {var0}, {var1}, etc.
+                let repeatedCmd = "";
+                try {
+                  repeatedCmd = cmd.replace(/@var(\d+)@/g, (_, index) => {
+                    return varsArr[Number(index)];
+                  });
+                } catch (e) {
+                  console.error("Error replacing {var} placeholders:", e);
+                }
+                
+                // Replace math expressions
+                try {
+                  repeatedCmd = repeatedCmd.replace(/{math:(.+?)}/g, (_, expr) => eval(expr));
+                } catch (e) {
+                  console.error("Error evaluating math expression:", e);
+                }
+                
+                result += repeatedCmd + "\n";
+              } catch (e) {
+                console.error(`Error processing iteration ${i}:`, e);
+              }
+            }
+            result = result.trimEnd();
+            rptest++;
+            return result;
+          });
+        } catch (e) {
+          console.error("Error in repeater:", e);
+        }
+        
+        // Test math replacement outside the repeater if no repeats occurred
+        if (rptest === 0) {
+          try {
+            command = command.replace(/{math:(.+?)}/g, (_, expr) => eval(expr));
+          } catch (e) {
+            console.error("Error evaluating math expression:", e);
+          }
+        } else {
+          console.warn("Repeated:", rptest);
         }
 
         commands.push(command);
@@ -478,10 +572,21 @@ function setupAddCommand() {
 
     // Reset the form to default values
     addCommandForm.reset();
-    document.getElementById('command-color').value = '#ff0000';
-    document.getElementById('command-template').value = 'execute positioned {x} {y} {z} run say Hello';
-    document.getElementById('color-preview').style.backgroundColor = '#ff0000';
+    if (document.getElementById('debug-auto').checked ? true : false) {
+      const randomColor = () => {
+        return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
+      };
 
+      const newColor = randomColor();
+      document.getElementById('command-color').value = newColor;
+      document.getElementById('command-template').value = '';
+      document.getElementById('color-preview').style.backgroundColor = newColor;
+      document.getElementById('command-name').value = randomColor();
+    } else {
+      document.getElementById('command-color').value = '#';
+      document.getElementById('command-template').value = '';
+      document.getElementById('color-preview').style.backgroundColor = '#';
+    }
     hideModal(addCommandModal);
   });
 }
