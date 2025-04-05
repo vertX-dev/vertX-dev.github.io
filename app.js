@@ -181,6 +181,8 @@ function addCommand(name, fill, template) {
 // Get preview content for the generated commands
 function getPreviewContent() {
   let commands = [];
+  let knbTags = [];
+  let knbDamages = [];
 
   // Loop through the matrix
   for (let row = 0; row < ROWS; row++) {
@@ -191,7 +193,7 @@ function getPreviewContent() {
         const x = col + (xOffset * -1);
         const y = 0; // Y is always 0 for 2D grid
         const z = row + (zOffset * -1);
-
+        
         // Special functions
         let command = colorData[value].template
           .replace(/{x}/g, x)
@@ -205,6 +207,18 @@ function getPreviewContent() {
           command = command.replace(/{crouch:False}/g, "execute at @s as @s positioned ~~1.5~ if entity @s[dx=0] run");
         } catch (e) {
           console.error("error in crouch test", e);
+        }
+        
+        //trajectory
+        try {
+          command = command.replace(/{trajectory:(.+?)}/g, (_, expr) => {
+            let [gravity, sy] = expr.split(",");
+            gravity = Number(gravity);
+            sy = Number(sy);
+            return `execute at @s positioned ^${x}^{math:Math.floor(${sy} - Math.floor((${gravity} * (Math.floor((Math.sqrt(((${x})) ** 2 + ((${z})) ** 2)) * 100) / 100)) * 100)) / 100}^${z} run `;
+          });
+        } catch (e) {
+          console.error("error in trajectory calculation", e);
         }
         
         //test water
@@ -234,7 +248,83 @@ function getPreviewContent() {
         } catch (e) {
           console.error("error in random test", e);
         }
-                //Repeat
+        
+        //Knockback
+        try {
+          command = command.replace(/#knb:(.+?)#/g, (_, expr) => {
+            //get all parameters
+            let [range, pwr, dmtg] = expr.split("|");
+            range = Number(range);
+            let [hpower, vpower] = pwr.split(",");
+            hpower = Number(hpower);
+            vpower = Number(vpower);
+            let [damage, tag] = dmtg.split(",");
+            damage = Number(damage);
+            
+            //calculate distance
+            let distance = Math.floor(Math.sqrt(((x) ** 2) + ((z) ** 2)) / 100) * 100;
+            
+            //Test if target in range
+            let powerk;
+            if (distance <= range) {
+              powerk = 1;
+            } else {
+              powerk = range / distance;
+            }
+            //main part
+            try {
+              //test direction
+              let dirx;
+              let dirz;
+              if (x > 0) {
+                dirx = 1;
+              } else if(x < 0) {
+                dirx = (-1);
+              } else {
+                dirx = Math.floor(Math.random() * 2 - 1);
+              }
+              if (z > 0) {
+                dirz = 1;
+              } else if(z < 0) {
+                dirz = (-1);
+              } else {
+                dirz = Math.floor(Math.random() * 2 - 1);
+              }
+              
+              //get absolute position
+              let xabs = Math.sqrt((x) ** 2);
+              let zabs = Math.sqrt((z) ** 2);
+              
+              //get value of x and z
+              const mltp = xabs + zabs;
+              let xpower = x / mltp;
+              let zpower = z / mltp;
+              
+              //get knb position
+              let xknb = ((xabs + (hpower * powerk)) * dirx) * xpower;
+              let zknb = ((zabs + (hpower * powerk)) * dirz) * zpower;
+              let yknb = vpower * powerk;
+              
+              //generate command
+              let result = `execute at @s positioned ^${x}^^${z} run tag @e[r=1] add ${tag}\n`;
+              if ((x ==0) && (z ==0)) {
+                result += `tag @s remove ${tag}\n`;
+              }
+              result += `execute at @s positioned ^${x}^^${z} run tp @e[r=1,tag=${tag}] ^${xknb}^${yknb}^${zknb}`;
+              knbTags.push(tag);
+              knbDamages.push(damage);
+              return result;
+              
+            } catch(e) {
+              console.error("error in main part of knockback", e);
+            }
+            return result;
+          });
+        } catch(e) {
+          console.error("error in knockback calculation", e);
+        }
+        
+        //Repeat
         let rptest = 0;
         try {
           command = command.replace(/#repeat:(.+?)#/g, (_, expr) => {
@@ -304,6 +394,10 @@ function getPreviewContent() {
 
         commands.push(command);
       }
+    }
+    //apply all repeating commands for optimization
+    for(let i = 0; i < knbTags.length; i++) {
+      commands.push(`damage @e[tag=${knbTags[i]}] ${knbDamages[i]}\ntag @e[tag=${knbTags[i]}] remove ${knbTags[i]}`);
     }
   }
 
@@ -583,7 +677,7 @@ function setupAddCommand() {
       document.getElementById('color-preview').style.backgroundColor = newColor;
       document.getElementById('command-name').value = randomColor();
     } else {
-      document.getElementById('command-color').value = '#';
+      document.getElementById('command-color').value = '';
       document.getElementById('command-template').value = '';
       document.getElementById('color-preview').style.backgroundColor = '#';
     }
@@ -720,6 +814,7 @@ function setupTemplatesModal() {
 function setupControl() {
   const controlButton = document.getElementById('switch-mobile-pc');
   const moveControlBtn = document.getElementById('move-grid');
+  const resetGrid = document.getElementById('reset-grid-btn');
   
   //Dragging setup
   mobile = controlButton.checked ? controlButton.value : "unchecked";
@@ -733,6 +828,15 @@ function setupControl() {
     moveGrid = moveControlBtn.checked ? "on" : "off";
     const canvasMovingElement = document.getElementById('grid-canvas');
     canvasMovingElement.style.touchAction = moveControlBtn.checked ? "auto" : "none";
-    
+  });
+  
+  //reset grid
+  let resetGridCounter = 0;
+  resetGrid.addEventListener('click', () => {
+    resetGridCounter++;
+    if (resetGridCounter >= 2) {
+      resetGridCounter = 0;
+      console.log("grid was reseted");
+    }
   });
 }
