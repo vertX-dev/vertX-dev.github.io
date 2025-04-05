@@ -834,9 +834,25 @@ function setupControl() {
   let resetGridCounter = 0;
   resetGrid.addEventListener('click', () => {
     resetGridCounter++;
+    if (resetGridCounter === 1) {
+        // Add visual feedback for first click
+        resetGrid.classList.add('clicked-once');
+        // Remove the class after 2 seconds if second click doesn't happen
+        setTimeout(() => {
+            if (resetGridCounter === 1) {
+                resetGridCounter = 0;
+                resetGrid.classList.remove('clicked-once');
+            }
+        }, 2000);
+    }
     if (resetGridCounter >= 2) {
-      resetGridCounter = 0;
-      console.log("grid was reseted");
+        resetGridCounter = 0;
+        resetGrid.classList.remove('clicked-once');
+        // Clear the matrix
+        matrix = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        // Redraw the grid
+        drawGrid();
+        console.log("grid was reset");
     }
   });
 }
