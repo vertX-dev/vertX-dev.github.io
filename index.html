@@ -54,6 +54,9 @@
           <span class="switch-text">Auto fill</span>
         </label>
       </div>
+      <div>
+        <button id="reset-grid-btn" class="btn">Reset grid</button>
+      </div>
       <div class="app-container">
         <!-- Left Panel: Control Panel for Modes and Commands -->
         <div class="left-panel">
@@ -140,7 +143,7 @@
             <div class="form-group">
               <label for="command-color">Color (hex):</label>
               <div class="form-group" id="color-group">
-                <input type="text" id="command-color" value="#" required />
+                <input type="color" id="command-color" required />
                 <div>
                   <button class="color-preview" id="color-preview"></button>
                 </div>
@@ -203,7 +206,8 @@
       </div>
     </div>
     
-   <!-- Templates Modal: Lists predefined command templates categorized by type -->
+
+<!-- Templates Modal: Lists predefined command templates categorized by type -->
     <div id="templates-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -220,103 +224,7 @@
               <code>say Hello Minecraft</code>
               <button class="copy-template-btn" data-template="say Hello Minecraft">Copy</button>
             </li>
-            <li>
-              <div class="template-header"><strong>Give Diamond</strong></div>
-              <code>give @p minecraft:diamond 1</code>
-              <button class="copy-template-btn" data-template="give @p minecraft:diamond 1">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Teleport Up</strong></div>
-              <code>tp @p ~ ~1 ~</code>
-              <button class="copy-template-btn" data-template="tp @p ~ ~1 ~">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Set Time to Day</strong></div>
-              <code>time set day</code>
-              <button class="copy-template-btn" data-template="time set day">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Clear Weather</strong></div>
-              <code>weather clear</code>
-              <button class="copy-template-btn" data-template="weather clear">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Apply Speed Effect</strong></div>
-              <code>effect @p speed 30 1</code>
-              <button class="copy-template-btn" data-template="effect @p speed 30 1">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Switch to Creative</strong></div>
-              <code>gamemode creative @p</code>
-              <button class="copy-template-btn" data-template="gamemode creative @p">Copy</button>
-            </li>
-    
-            <!-- Math Commands Category -->
-            <li class="template-tag math-tag">Math Commands</li>
-            <li>
-              <div class="template-header"><strong>Armor Stand Math</strong></div>
-              <code>summon minecraft:armor_stand {math:Math.floor(1.5)} 64 {x}</code>
-              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.floor(1.5)} 64 {x}">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Armor Stand Math Ceiling</strong></div>
-              <code>summon minecraft:armor_stand {math:Math.ceil(1.5)} 64 {x}</code>
-              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.ceil(1.5)} 64 {x}">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Armor Stand Math Round</strong></div>
-              <code>summon minecraft:armor_stand {math:Math.round(2.7)} 64 {x}</code>
-              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.round(2.7)} 64 {x}">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Armor Stand Math Max</strong></div>
-              <code>summon minecraft:armor_stand {math:Math.max(1,2)} 64 {x}</code>
-              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.max(1,2)} 64 {x}">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Armor Stand Math Min</strong></div>
-              <code>summon minecraft:armor_stand {math:Math.min(1,2)} 64 {x}</code>
-              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.min(1,2)} 64 {x}">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Armor Stand Math Random</strong></div>
-              <code>summon minecraft:armor_stand {math:Math.floor(Math.random()*10)} 64 {x}</code>
-              <button class="copy-template-btn" data-template="summon minecraft:armor_stand {math:Math.floor(Math.random()*10)} 64 {x}">Copy</button>
-            </li>
-    
-            <!-- Special Target Commands Category -->
-            <li class="template-tag special-target-tag">Special Target Commands</li>
-            <li>
-              <div class="template-header"><strong>Special Target</strong></div>
-              <code>execute as @e[Special target] if score @s health matches ..0 run say Dead</code>
-              <button class="copy-template-btn" data-template="execute as @e[Special target] if score @s health matches ..0 run say Dead">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Charged Creeper Alert</strong></div>
-              <code>execute as @e[type=creeper,tag=charged] run say Charged Creeper</code>
-              <button class="copy-template-btn" data-template="execute as @e[type=creeper,tag=charged] run say Charged Creeper">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Aggressive Zombie Warning</strong></div>
-              <code>execute as @e[type=zombie,tag=aggressive] run say Beware Zombie</code>
-              <button class="copy-template-btn" data-template="execute as @e[type=zombie,tag=aggressive] run say Beware Zombie">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Custom Target Activate</strong></div>
-              <code>execute as @e[CustomTarget] run say Custom target activated</code>
-              <button class="copy-template-btn" data-template="execute as @e[CustomTarget] run say Custom target activated">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>Elite Skeleton Alert</strong></div>
-              <code>execute as @e[type=skeleton,tag=elite] run say Elite Skeleton</code>
-              <button class="copy-template-btn" data-template="execute as @e[type=skeleton,tag=elite] run say Elite Skeleton">Copy</button>
-            </li>
-            <li>
-              <div class="template-header"><strong>VIP Player Notice</strong></div>
-              <code>execute as @e[type=player,tag=VIP] run say VIP player here</code>
-              <button class="copy-template-btn" data-template="execute as @e[type=player,tag=VIP] run say VIP player here">Copy</button>
-            </li>
-    
+            
             <!-- Normal Target Commands Category -->
             <li class="template-tag normal-target-tag">Normal Target Commands</li>
             <li>
@@ -324,30 +232,48 @@
               <code>execute positioned ^1 ^ ^-1 run say Normal Target</code>
               <button class="copy-template-btn" data-template="execute positioned ^1 ^ ^-1 run say Normal Target">Copy</button>
             </li>
+    
+            <!-- Special Commands Category -->
+            <li class="template-tag special-target-tag">Special Commands</li>
             <li>
-              <div class="template-header"><strong>Teleport to Block</strong></div>
-              <code>execute as @p positioned 0 64 0 run tp @s ~ ~ ~</code>
-              <button class="copy-template-btn" data-template="execute as @p positioned 0 64 0 run tp @s ~ ~ ~">Copy</button>
+              <div class="template-header"><strong>Crouch test</strong></div>
+              <code>{crouch:True} and {crouch:False} execute commands based on the entity's crouching state</code>
+              <button class="copy-template-btn" data-template="{crouch:True}">Copy</button>
             </li>
             <li>
-              <div class="template-header"><strong>Summon Cow</strong></div>
-              <code>execute positioned ~ ~ ~ run summon minecraft:cow</code>
-              <button class="copy-template-btn" data-template="execute positioned ~ ~ ~ run summon minecraft:cow">Copy</button>
+              <div class="template-header"><strong>Math</strong></div>
+              <code>{math:expression} computes and replaces the result of the expression</code>
+              <button class="copy-template-btn" data-template="{math:}">Copy</button>
             </li>
             <li>
-              <div class="template-header"><strong>Drop Apple</strong></div>
-              <code>execute positioned ^ ^ ^ run give @p minecraft:apple 1</code>
-              <button class="copy-template-btn" data-template="execute positioned ^ ^ ^ run give @p minecraft:apple 1">Copy</button>
+              <div class="template-header"><strong>Random number</strong></div>
+              <code>{random:min,max} is replaced with a random integer between min and max</code>
+              <button class="copy-template-btn" data-template="{random:min,max}">Copy</button>
             </li>
             <li>
-              <div class="template-header"><strong>Set Stone Block</strong></div>
-              <code>execute positioned ^1 ^ ^ run setblock ~ ~ ~ minecraft:stone</code>
-              <button class="copy-template-btn" data-template="execute positioned ^1 ^ ^ run setblock ~ ~ ~ minecraft:stone">Copy</button>
+              <div class="template-header"><strong>In water</strong></div>
+              <code>{inWater:True} and {inWater:False} check if entity in water</code>
+              <button class="copy-template-btn" data-template="{inWater:True}">Copy</button>
             </li>
             <li>
-              <div class="template-header"><strong>Particle Effect</strong></div>
-              <code>execute positioned ^ ^ ^ run particle minecraft:happy_villager ~ ~ ~ 0 0 0 0 1</code>
-              <button class="copy-template-btn" data-template="execute positioned ^ ^ ^ run particle minecraft:happy_villager ~ ~ ~ 0 0 0 0 1">Copy</button>
+              <div class="template-header"><strong>In air</strong></div>
+              <code>{inAir:True} and {inAir:False} check if entity in air</code>
+              <button class="copy-template-btn" data-template="{inAir:True}">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Repeat commands</strong></div>
+              <code>Syntax: #repeat:command|loops|variables#<br><br>Use @i@ for the current iteration and @var0@, @var1@, etc., for variables (semicolon-separated)</code>
+              <button class="copy-template-btn" data-template="#repeat:cmd|loops|var1;var2#">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Trajectory</strong></div>
+              <code>{trajectory:g,y}<br>g - gravity, drop by g for every block traveled</code>
+              <button class="copy-template-btn" data-template="{trajectory:0.1,1}">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Knockback</strong></div>
+              <code>Syntax: #knb:radius|type|power|damage/tag#<br>1 - range; 2 - power(2.1 - horizontal, 2.2 - vertical); 3 - amount of damage and tag</code>
+              <button class="copy-template-btn" data-template="#knb:7|b,d|3,2|10#">Copy</button>
             </li>
           </ul>
         </div>
