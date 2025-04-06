@@ -217,20 +217,23 @@
         <div class="modal-body">
           <!-- List of available command templates organized by categories -->
           <ul id="templates-list">
-            <!-- Normal Commands Category -->
-            <li class="template-tag normal-tag">Normal Commands</li>
-            <li>
-              <div class="template-header"><strong>Say Hello</strong></div>
-              <code>say Hello Minecraft</code>
-              <button class="copy-template-btn" data-template="say Hello Minecraft">Copy</button>
-            </li>
             
             <!-- Normal Target Commands Category -->
             <li class="template-tag normal-target-tag">Normal Target Commands</li>
             <li>
-              <div class="template-header"><strong>Normal Target</strong></div>
-              <code>execute positioned ^1 ^ ^-1 run say Normal Target</code>
-              <button class="copy-template-btn" data-template="execute positioned ^1 ^ ^-1 run say Normal Target">Copy</button>
+              <div class="template-header"><strong>Mark target</strong></div>
+              <code>execute at @s positioned ^{z}^^{x} run tag @e[r=1] add </code>
+              <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run tag @e[r=1] add ">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Damage target</strong></div>
+              <code>execute at @s positioned ^{z}^^{x} run damage @e[r=1]  </code>
+              <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run damage @e[r=1] ">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Effect on target</strong></div>
+              <code>execute at @s positioned ^{z}^^{x} run effect @e[r=1] effect 1 1 true </code>
+              <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run effect @e[r=1] ">Copy</button>
             </li>
     
             <!-- Special Commands Category -->
