@@ -221,18 +221,23 @@
             <!-- Normal Target Commands Category -->
             <li class="template-tag normal-target-tag">Normal Target Commands</li>
             <li>
-              <div class="template-header"><strong>Mark target</strong></div>
-              <code>execute at @s positioned ^{z}^^{x} run tag @e[r=1] add </code>
+              <div class="template-header"><strong>Mark targets</strong></div>
+              <code>execute at @s positioned ^{x}^^{z} run tag @e[r=1] add </code>
+              <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run tag @e[r=1] add ">Copy</button>
+            </li>
+            <li>
+              <div class="template-header"><strong>Mark 1 target</strong></div>
+              <code>execute at @s positioned ^{x}^^{z} run tag @e[r=1,c=1] add </code>
               <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run tag @e[r=1] add ">Copy</button>
             </li>
             <li>
               <div class="template-header"><strong>Damage target</strong></div>
-              <code>execute at @s positioned ^{z}^^{x} run damage @e[r=1]  </code>
+              <code>execute at @s positioned ^{x}^^{z} run damage @e[r=1]  </code>
               <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run damage @e[r=1] ">Copy</button>
             </li>
             <li>
               <div class="template-header"><strong>Effect on target</strong></div>
-              <code>execute at @s positioned ^{z}^^{x} run effect @e[r=1] effect 1 1 true </code>
+              <code>execute at @s positioned ^{x}^^{z} run effect @e[r=1] effect 1 1 true </code>
               <button class="copy-template-btn" data-template="execute at @s positioned ^{z}^^{x} run effect @e[r=1] ">Copy</button>
             </li>
     
