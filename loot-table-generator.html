@@ -144,6 +144,40 @@
             border-radius: 4px;
             overflow-x: auto;
         }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr; /* Change to single column */
+                padding: 10px;
+                min-height: auto;
+            }
+            
+            .header {
+                grid-column: 1;
+            }
+            
+            .footer {
+                grid-column: 1;
+            }
+            
+            .panel {
+                margin-bottom: 15px;
+            }
+            
+            .file-list {
+                height: 300px; /* Reduce height on mobile */
+            }
+            
+            .structures-list {
+                height: 200px; /* Reduce height on mobile */
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+        }    
+    
     </style>
 </head>
 <body>
@@ -187,8 +221,16 @@
             <div class="input-group">
                 <label for="enchant-level">Enchantment Level:</label>
                 <input type="number" id="enchant-level" min="0">
-            </div>
-            
+            </div>            
+            <div class="input-group">
+                <label class="switch-label">
+                    <input type="checkbox" id="create-new-pool" checked>
+                    <span class="switch-text">Create new pool</span>
+                </label>
+                <div class="switch-description">
+                    If enabled, creates a new pool. If disabled, modifies the last existing pool.
+                </div>
+            </div>            
             <h3 style="margin-top: 20px;">Available Structures:</h3>
             <div class="structures-list" id="structures-list">
                 <!-- Structures will be populated here -->
@@ -197,19 +239,11 @@
         
         <div class="footer">
             <div class="button-container" style="justify-content: center;">
-                <button class="button button-secondary" id="preview-changes">Preview Changes</button>
                 <button class="button" id="apply-changes">Apply to All</button>
             </div>
         </div>
     </div>
     
-    <div id="preview-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Preview Changes</h2>
-            <div id="preview-content"></div>
-        </div>
-    </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -247,8 +281,8 @@
                     this.folderPathInput = document.getElementById('folder-path');
                     this.fileList = document.getElementById('file-list');
                     this.structuresList = document.getElementById('structures-list');
-                    this.previewModal = document.getElementById('preview-modal');
-                    this.previewContent = document.getElementById('preview-content');
+                    this.createNewPoolCheackbox = document.getElementById('create-new-pool');
+                    
                     
                     // Initialize form elements
                     this.itemIdInput = document.getElementById('item-id');
@@ -272,7 +306,6 @@
                     document.getElementById('deselect-all').addEventListener('click', () => this.deselectAll());
                     
                     // Action buttons
-                    document.getElementById('preview-changes').addEventListener('click', () => this.previewChanges());
                     document.getElementById('apply-changes').addEventListener('click', () => this.applyChanges());
                     
                     // Modal close button
@@ -516,79 +549,83 @@
                     return entry;
                 }
                 
-                previewChanges() {
-                    if (!this.validateInput()) {
-                        return;
+                async generateModifiedLootTable(content, fileName) {
+                    try {
+                        const lootTable = JSON.parse(content);
+                        
+                        // Ensure pools array exists
+                        if (!lootTable.pools) {
+                            lootTable.pools = [];
+                        }
+                        
+                        if (this.createNewPoolCheckbox.checked) {
+                            // Create new pool
+                            const newPool = {
+                                rolls: parseInt(this.rollsInput.value),
+                                entries: [this.generateNewEntry(fileName)]
+                            };
+                            lootTable.pools.push(newPool);
+                        } else {
+                            // Modify last existing pool
+                            let targetPool;
+                            if (lootTable.pools.length > 0) {
+                                targetPool = lootTable.pools[lootTable.pools.length - 1];
+                                targetPool.rolls = parseInt(this.rollsInput.value);
+                                targetPool.entries.push(this.generateNewEntry(fileName));
+                            } else {
+                                // If no pools exist, create one anyway
+                                targetPool = {
+                                    rolls: parseInt(this.rollsInput.value),
+                                    entries: [this.generateNewEntry(fileName)]
+                                };
+                                lootTable.pools.push(targetPool);
+                            }
+                        }
+                        
+                        return JSON.stringify(lootTable, null, 2);
+                    } catch (error) {
+                        throw new Error(`Failed to modify loot table: ${error.message}`);
                     }
-                    
-                    if (this.selectedFiles.length === 0) {
-                        alert("No files selected!");
-                        return;
-                    }
-                    
-                    // Clear previous content
-                    this.previewContent.innerHTML = '';
-                    
-                    // Generate preview content
-                    this.selectedFiles.forEach(fileName => {
-                        const container = document.createElement('div');
-                        container.innerHTML = `<h3>=== ${fileName} ===</h3>`;
-                        
-                        const poolSettings = document.createElement('div');
-                        poolSettings.innerHTML = `<h4>Pool Settings:</h4>
-                            <p>Rolls: ${this.rollsInput.value}</p>`;
-                        container.appendChild(poolSettings);
-                        
-                        const newEntry = document.createElement('div');
-                        newEntry.innerHTML = `<h4>New Entry:</h4>`;
-                        
-                        const pre = document.createElement('pre');
-                        pre.textContent = JSON.stringify(this.generateNewEntry(fileName), null, 2);
-                        newEntry.appendChild(pre);
-                        
-                        container.appendChild(newEntry);
-                        this.previewContent.appendChild(container);
-                    });
-                    
-                    // Show the modal
-                    this.previewModal.style.display = 'block';
                 }
-                
+            
+                // Update applyChanges method to include success details
                 async applyChanges() {
                     if (!this.validateInput()) {
                         return;
                     }
-                
+            
                     if (this.selectedFiles.length === 0) {
                         alert("No files selected!");
                         return;
                     }
-                
-                    const confirmResult = confirm(`Are you sure you want to modify ${this.selectedFiles.length} file(s)?`);
+            
+                    const poolAction = this.createNewPoolCheckbox.checked ? "create new pools" : "modify existing pools";
+                    const confirmResult = confirm(
+                        `Are you sure you want to modify ${this.selectedFiles.length} file(s)?\n` +
+                        `Action: ${poolAction}\n` +
+                        `This will create a zip file with the modified files and backups.`
+                    );
                     if (!confirmResult) {
                         return;
                     }
-                
+            
                     try {
-                        // Create a new ZIP file
                         const zip = new JSZip();
                         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                         
-                        // Create a folder for modified files
                         const modifiedFolder = zip.folder("modified_loot_tables");
-                        // Create a folder for backups
                         const backupFolder = zip.folder("backups");
-                
+            
+                        let processedCount = 0;
                         for (const fileObj of this.selectedFiles) {
                             try {
                                 if (!fileObj || !fileObj.name) {
                                     console.error('Invalid file object:', fileObj);
                                     continue;
                                 }
-                
+            
                                 console.log('Processing file:', fileObj.name);
                                 
-                                // Get the file handle and content
                                 const fileHandle = await this.selectedFolder.getFileHandle(fileObj.name);
                                 const file = await fileHandle.getFile();
                                 const content = await file.text();
@@ -605,67 +642,36 @@
                                 // Add modified file to zip
                                 modifiedFolder.file(fileObj.name, modifiedContent);
                                 
+                                processedCount++;
                             } catch (error) {
                                 alert(`Error processing ${fileObj.name}: ${error.message}`);
                                 return;
                             }
                         }
-                
-                        // Generate the zip file
+            
+                        // Generate and download zip
                         const zipBlob = await zip.generateAsync({type: "blob"});
-                        
-                        // Create download link for the zip
                         const downloadLink = document.createElement('a');
                         downloadLink.href = URL.createObjectURL(zipBlob);
                         downloadLink.download = `loot_tables_${timestamp}.zip`;
                         
-                        // Trigger download
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
                         document.body.removeChild(downloadLink);
                         
-                        // Cleanup
                         URL.revokeObjectURL(downloadLink.href);
-                
-                        alert(`Successfully created zip file with ${this.selectedFiles.length} modified file(s)!`);
+            
+                        alert(
+                            `Successfully processed ${processedCount} file(s)!\n` +
+                            `Action performed: ${poolAction}\n` +
+                            `Modified files and backups are in the downloaded zip file.`
+                        );
                     } catch (error) {
                         console.error('Failed to create zip file:', error);
                         alert(`Failed to create zip file: ${error.message}`);
                     }
-                }
-                
-                // Add new method to generate modified loot table content
-                async generateModifiedLootTable(content, fileName) {
-                    try {
-                        const lootTable = JSON.parse(content);
-                        
-                        // Ensure pools array exists
-                        if (!lootTable.pools) {
-                            lootTable.pools = [];
-                        }
-                        
-                        // Find or create the appropriate pool
-                        let targetPool = lootTable.pools.find(pool => pool.rolls);
-                        if (!targetPool) {
-                            targetPool = {
-                                rolls: parseInt(this.rollsInput.value),
-                                entries: []
-                            };
-                            lootTable.pools.push(targetPool);
-                        } else {
-                            targetPool.rolls = parseInt(this.rollsInput.value);
-                        }
-                        
-                        // Add the new entry
-                        const newEntry = this.generateNewEntry(fileName);
-                        targetPool.entries.push(newEntry);
-                        
-                        // Return the modified content
-                        return JSON.stringify(lootTable, null, 2);
-                    } catch (error) {
-                        throw new Error(`Failed to modify loot table: ${error.message}`);
-                    }
-                }                                 
+                }              
+                                                
                                  
                 async readFile(filePath) {
                     try {
