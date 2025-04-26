@@ -546,84 +546,82 @@
                     // Show the modal
                     this.previewModal.style.display = 'block';
                 }
-                
                 async applyChanges() {
-                  if (!this.validateInput()) {
-                    return;
-                  }
-    
-                  if (this.selectedFiles.length === 0) {
-                    alert("No files selected!");
-                    return;
-                  }
-    
-                  const confirmResult = confirm(`Are you sure you want to modify ${this.selectedFiles.length} file(s)? This will create backups before making changes.`);
-                  if (!confirmResult) {
-                    return;
-                  }
-    
-                  for (const fileName of this.selectedFiles) {
-                    const filePath = `${this.selectedFolder}/${fileName}`;
-                    try {
-                    // Create backup first
-                      await this.createBackup(filePath);
-            
-                    // Modify the loot table
-                      await this.modifyLootTable(filePath);
-                    } catch (error) {
-                      alert(`Error processing ${fileName}: ${error.message}`);
-                      return;
+                    if (!this.validateInput()) {
+                        return;
                     }
-                  }
-    
-                  alert(`Successfully modified ${this.selectedFiles.length} file(s)!`);
+                
+                    if (this.selectedFiles.length === 0) {
+                        alert("No files selected!");
+                        return;
+                    }
+                
+                    const confirmResult = confirm(`Are you sure you want to modify ${this.selectedFiles.length} file(s)? This will create backups before making changes.`);
+                    if (!confirmResult) {
+                        return;
+                    }
+                
+                    for (const fileObj of this.selectedFiles) {
+                        try {
+                            // Get the file handle from the selected folder
+                            const fileHandle = await this.selectedFolder.getFileHandle(fileObj.name);
+                            
+                            // Create backup first
+                            await this.createBackup(fileHandle);
+                            
+                            // Modify the loot table
+                            await this.modifyLootTable(fileHandle);
+                        } catch (error) {
+                            alert(`Error processing ${fileObj.name}: ${error.message}`);
+                            return;
+                        }
+                    }
+                
+                    alert(`Successfully modified ${this.selectedFiles.length} file(s)!`);
                 }
                 
-                async createBackup(filePath) {
-                  try {
-                    const response = await fetch(filePath);
-                    const content = await response.text();
-                      
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                    const backupPath = `${filePath}.${timestamp}.backup`;
-                    
-                    // Use the File System Access API to write the backup
-                    const handle = await window.showSaveFilePicker({
-                      suggestedName: backupPath.split('/').pop(),
-                      types: [{
-                        description: 'JSON Backup File',
-                        accept: {'application/json': ['.backup']}
-                      }],
-                    });
-        
-                    const writable = await handle.createWritable();
-                    await writable.write(content);
-                    await writable.close();
-                    
-                    return true;
+                async createBackup(fileHandle) {
+                    try {
+                        // Read the original file
+                        const file = await fileHandle.getFile();
+                        const content = await file.text();
+                        
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const backupName = `${file.name}.${timestamp}.backup`;
+                        
+                        try {
+                            // Try to get a handle to create backup in the same directory
+                            const backupHandle = await this.selectedFolder.getFileHandle(backupName, { create: true });
+                            const writable = await backupHandle.createWritable();
+                            await writable.write(content);
+                            await writable.close();
+                        } catch (error) {
+                            // If we can't write to the same directory, show save dialog
+                            const handle = await window.showSaveFilePicker({
+                                suggestedName: backupName,
+                                types: [{
+                                    description: 'JSON Backup File',
+                                    accept: {'application/json': ['.backup']}
+                                }],
+                            });
+                            const writable = await handle.createWritable();
+                            await writable.write(content);
+                            await writable.close();
+                        }
+                        
+                        return true;
                     } catch (error) {
-                      console.error('Backup creation failed:', error);
-                      throw new Error(`Failed to create backup: ${error.message}`);
+                        console.error('Backup creation failed:', error);
+                        throw new Error(`Failed to create backup: ${error.message}`);
                     }
                 }
-                async modifyLootTable(filePath) {
+                
+                async modifyLootTable(fileHandle) {
                     try {
-                        let lootTable;
-                        
-                        if (filePath instanceof FileSystemFileHandle) {
-                            // Using File System Access API
-                            const file = await filePath.getFile();
-                            const content = await file.text();
-                            lootTable = JSON.parse(content);
-                        } else {
-                            // Using traditional file access
-                            const file = this.selectedFiles.find(f => f.handle.name === filePath.split('/').pop());
-                            if (!file) {
-                                throw new Error('File not found');
-                            }
-                            const content = await file.handle.text();
-                            lootTable = JSON.parse(content);
-                        }
+                        // Read the existing file
+                        const file = await fileHandle.getFile();
+                        const content = await file.text();
+                        const lootTable = JSON.parse(content);
                         
                         // Ensure pools array exists
                         if (!lootTable.pools) {
@@ -643,31 +641,21 @@
                         }
                         
                         // Add the new entry
-                        const newEntry = this.generateNewEntry(typeof filePath === 'string' ? filePath.split('/').pop() : filePath.name);
+                        const newEntry = this.generateNewEntry(file.name);
                         targetPool.entries.push(newEntry);
                         
-                        // Save the modified loot table
-                        if (filePath instanceof FileSystemFileHandle) {
-                            // Using File System Access API
-                            const writable = await filePath.createWritable();
-                            await writable.write(JSON.stringify(lootTable, null, 2));
-                            await writable.close();
-                        } else {
-                            // Using traditional file download
-                            const blob = new Blob([JSON.stringify(lootTable, null, 2)], { type: 'application/json' });
-                            const downloadLink = document.createElement('a');
-                            downloadLink.href = URL.createObjectURL(blob);
-                            downloadLink.download = filePath.split('/').pop();
-                            downloadLink.click();
-                            URL.revokeObjectURL(downloadLink.href);
-                        }
+                        // Save the modified loot table back to the original file
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(JSON.stringify(lootTable, null, 2));
+                        await writable.close();
                         
                         return true;
                     } catch (error) {
                         console.error('Loot table modification failed:', error);
                         throw new Error(`Failed to modify loot table: ${error.message}`);
                     }
-                }                            
+                }                
+                                 
                 async readFile(filePath) {
                     try {
                         const handle = await window.showOpenFilePicker({
