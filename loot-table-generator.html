@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Bedrock Loot-Table Editor</title>
@@ -224,17 +225,23 @@
                     const timestamp = now.toISOString().replace('T', ' ').substr(0, 19);
                     
                     this.loreMappings = {
-                        "ancient_city": `§7Found by vertX-dev §8- §klt{${timestamp}}`,
-                        "desert_pyramid": `§eDesert Discovery by vertX-dev §8- §klt{${timestamp}}`,
-                        "jungle_temple": `§aJungle Secret by vertX-dev §8- §klt{${timestamp}}`,
-                        "stronghold": `§dStronghold Relic by vertX-dev §8- §klt{${timestamp}}`,
-                        "woodland_mansion": `§2Mansion Mystery by vertX-dev §8- §klt{${timestamp}}`,
-                        "bastion_remnant": `§6Bastion Treasure by vertX-dev §8- §klt{${timestamp}}`,
-                        "nether_fortress": `§cNether Secret by vertX-dev §8- §klt{${timestamp}}`,
-                        "end_city": `§5End Discovery by vertX-dev §8- §klt{${timestamp}}`,
-                        "ruined_portal": `§klt{ruined_portal}`,
-                        "underwater_ruin": `§klt{ocean_ruin}`
-                    };
+                      "ancient_city":     "§klt{ancient_city}",
+                      "village":          "§klt{village}",
+                      "mineshaft":        "§klt{mineshaft}",
+                      "ocean_ruin":       "§klt{ocean_ruin}",
+                      "shipwreck":        "§klt{shipwreck}",
+                      "pillager_outpost": "§klt{pillager_outpost}",
+                      "ruined_portal":    "§klt{ruined_portal}",
+                      "igloo":            "§klt{igloo}",
+                      "witch_hut":        "§klt{witch_hut}",
+                      "desert_pyramid":   "§klt{desert_pyramid}",
+                      "jungle_pyramid":   "§klt{jungle_pyramid}",
+                      "stronghold":       "§klt{stronghold}",
+                      "woodland_mansion": "§klt{woodland_mansion}",
+                      "nether_fortress":  "§klt{nether_fortress}",
+                      "bastion_remnant":  "§klt{bastion_remnant}",
+                      "end_city":         "§klt{end_city}"
+                    };                    
                     
                     // Initialize UI elements
                     this.folderPathInput = document.getElementById('folder-path');
@@ -365,12 +372,11 @@
                                 item.classList.toggle('selected');
                                 
                                 if (item.classList.contains('selected')) {
-                                    this.selectedFiles.push(file);
-                                } else {
-                                    const index = this.selectedFiles.findIndex(f => f.name === file.name);
-                                    if (index !== -1) {
-                                        this.selectedFiles.splice(index, 1);
+                                    if (!this.selectedFiles.some(f => f.name === file.name)) {
+                                        this.selectedFiles.push(file);
                                     }
+                                } else {
+                                    this.selectedFiles = this.selectedFiles.filter(f => f.name !== file.name);
                                 }
                             });
                             
@@ -380,7 +386,7 @@
                         console.error('Loading files failed:', error);
                         alert(`Failed to load files: ${error.message}`);
                     }
-                }
+                }                
                 
                 // Add this new method to handle files from input element
                 async loadFilesFromInput(inputFiles) {
@@ -436,12 +442,13 @@
                     const items = this.fileList.querySelectorAll('.file-item');
                     items.forEach(item => {
                         item.classList.add('selected');
-                        const file = item.dataset.file;
-                        if (!this.selectedFiles.includes(file)) {
+                        const fileName = item.dataset.file;
+                        const file = this.files.find(f => f.name === fileName);
+                        if (file && !this.selectedFiles.includes(file)) {
                             this.selectedFiles.push(file);
                         }
                     });
-                }
+                }                
                 
                 deselectAll() {
                     const items = this.fileList.querySelectorAll('.file-item');
@@ -546,6 +553,7 @@
                     // Show the modal
                     this.previewModal.style.display = 'block';
                 }
+                
                 async applyChanges() {
                     if (!this.validateInput()) {
                         return;
@@ -556,71 +564,79 @@
                         return;
                     }
                 
-                    const confirmResult = confirm(`Are you sure you want to modify ${this.selectedFiles.length} file(s)? This will create backups before making changes.`);
+                    const confirmResult = confirm(`Are you sure you want to modify ${this.selectedFiles.length} file(s)?`);
                     if (!confirmResult) {
                         return;
                     }
                 
-                    for (const fileObj of this.selectedFiles) {
-                        try {
-                            // Get the file handle from the selected folder
-                            const fileHandle = await this.selectedFolder.getFileHandle(fileObj.name);
-                            
-                            // Create backup first
-                            await this.createBackup(fileHandle);
-                            
-                            // Modify the loot table
-                            await this.modifyLootTable(fileHandle);
-                        } catch (error) {
-                            alert(`Error processing ${fileObj.name}: ${error.message}`);
-                            return;
-                        }
-                    }
-                
-                    alert(`Successfully modified ${this.selectedFiles.length} file(s)!`);
-                }
-                
-                async createBackup(fileHandle) {
                     try {
-                        // Read the original file
-                        const file = await fileHandle.getFile();
-                        const content = await file.text();
-                        
+                        // Create a new ZIP file
+                        const zip = new JSZip();
                         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                        const backupName = `${file.name}.${timestamp}.backup`;
                         
-                        try {
-                            // Try to get a handle to create backup in the same directory
-                            const backupHandle = await this.selectedFolder.getFileHandle(backupName, { create: true });
-                            const writable = await backupHandle.createWritable();
-                            await writable.write(content);
-                            await writable.close();
-                        } catch (error) {
-                            // If we can't write to the same directory, show save dialog
-                            const handle = await window.showSaveFilePicker({
-                                suggestedName: backupName,
-                                types: [{
-                                    description: 'JSON Backup File',
-                                    accept: {'application/json': ['.backup']}
-                                }],
-                            });
-                            const writable = await handle.createWritable();
-                            await writable.write(content);
-                            await writable.close();
+                        // Create a folder for modified files
+                        const modifiedFolder = zip.folder("modified_loot_tables");
+                        // Create a folder for backups
+                        const backupFolder = zip.folder("backups");
+                
+                        for (const fileObj of this.selectedFiles) {
+                            try {
+                                if (!fileObj || !fileObj.name) {
+                                    console.error('Invalid file object:', fileObj);
+                                    continue;
+                                }
+                
+                                console.log('Processing file:', fileObj.name);
+                                
+                                // Get the file handle and content
+                                const fileHandle = await this.selectedFolder.getFileHandle(fileObj.name);
+                                const file = await fileHandle.getFile();
+                                const content = await file.text();
+                                
+                                // Create backup
+                                backupFolder.file(
+                                    `${fileObj.name}.${timestamp}.backup`,
+                                    content
+                                );
+                                
+                                // Modify the loot table
+                                const modifiedContent = await this.generateModifiedLootTable(content, fileObj.name);
+                                
+                                // Add modified file to zip
+                                modifiedFolder.file(fileObj.name, modifiedContent);
+                                
+                            } catch (error) {
+                                alert(`Error processing ${fileObj.name}: ${error.message}`);
+                                return;
+                            }
                         }
+                
+                        // Generate the zip file
+                        const zipBlob = await zip.generateAsync({type: "blob"});
                         
-                        return true;
+                        // Create download link for the zip
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = URL.createObjectURL(zipBlob);
+                        downloadLink.download = `loot_tables_${timestamp}.zip`;
+                        
+                        // Trigger download
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        
+                        // Cleanup
+                        URL.revokeObjectURL(downloadLink.href);
+                
+                        alert(`Successfully created zip file with ${this.selectedFiles.length} modified file(s)!`);
                     } catch (error) {
-                        console.error('Backup creation failed:', error);
-                        throw new Error(`Failed to create backup: ${error.message}`);
+                        console.error('Failed to create zip file:', error);
+                        alert(`Failed to create zip file: ${error.message}`);
                     }
                 }
                 
-                async modifyLootTable(fileHandle) {
+                // Add new method to generate modified loot table content
+                async generateModifiedLootTable(content, fileName) {
                     try {
-                        // Read the existing file
-                        const file = await fileHandle.getFile();
-                        const content = await file.text();
                         const lootTable = JSON.parse(content);
                         
                         // Ensure pools array exists
@@ -641,20 +657,15 @@
                         }
                         
                         // Add the new entry
-                        const newEntry = this.generateNewEntry(file.name);
+                        const newEntry = this.generateNewEntry(fileName);
                         targetPool.entries.push(newEntry);
                         
-                        // Save the modified loot table back to the original file
-                        const writable = await fileHandle.createWritable();
-                        await writable.write(JSON.stringify(lootTable, null, 2));
-                        await writable.close();
-                        
-                        return true;
+                        // Return the modified content
+                        return JSON.stringify(lootTable, null, 2);
                     } catch (error) {
-                        console.error('Loot table modification failed:', error);
                         throw new Error(`Failed to modify loot table: ${error.message}`);
                     }
-                }                
+                }                                 
                                  
                 async readFile(filePath) {
                     try {
