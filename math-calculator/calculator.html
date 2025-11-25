@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Probability Distribution Calculator</title>
+        <link rel="stylesheet" href="calculator.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <h1>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #4f46e5">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                        />
+                    </svg>
+                    Probability Distribution Calculator
+                </h1>
+                <p class="subtitle">Calculate expected value, variance, and standard deviation</p>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('manual')">Manual Input</button>
+                    <button class="tab" onclick="switchTab('binomial')">
+                        <span style="display: inline-flex; align-items: center; gap: 0.5rem">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            Binomial Generator
+                        </span>
+                    </button>
+                </div>
+
+                <div id="manualTab" class="tab-content active">
+                    <div class="input-grid">
+                        <div class="input-header">Value (X)</div>
+                        <div class="input-header">Probability P(X)</div>
+                        <div class="input-header"></div>
+                    </div>
+                    <div id="rowsContainer"></div>
+
+                    <button class="btn-success" onclick="addRow()" style="margin-top: 0.5rem">
+                        <span style="display: inline-flex; align-items: center; gap: 0.5rem">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Row
+                        </span>
+                    </button>
+
+                    <div class="info-box">
+                        <p>Sum of probabilities: <span id="probSum">0.0000</span></p>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="calculate()">Calculate</button>
+                        <button class="btn-secondary" onclick="reset()">Reset</button>
+                    </div>
+                </div>
+
+                <div id="binomialTab" class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Number of experiments (n)</label>
+                        <input type="number" id="binomialN" min="1" max="1000" placeholder="Enter number of experiments" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Probability of success (p)</label>
+                            <input type="number" id="binomialP" step="0.01" min="0" max="1" placeholder="Enter probability" oninput="updateBinomialQ()" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Probability of failure (q)</label>
+                            <input type="number" id="binomialQ" step="0.01" min="0" max="1" placeholder="Auto-calculated" oninput="updateBinomialP()" />
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="generateBinomialTable()">Generate Distribution</button>
+                        <button class="btn-secondary" onclick="reset()">Reset</button>
+                    </div>
+
+                    <div id="binomialTableContainer"></div>
+                </div>
+
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+        <script src="calculator.js"></script>
+    </body>
+</html>
