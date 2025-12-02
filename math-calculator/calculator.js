@@ -26,7 +26,7 @@ function renderRows() {
         const rowDiv = document.createElement("div");
         rowDiv.className = "input-grid";
         rowDiv.innerHTML = `
-        <input type="number" step="any" value="${row.value}" 
+        <input type="text" step="any" value="${row.value}" 
                oninput="updateRowValue(${row.id}, this.value)" 
                placeholder="Enter value">
         <input type="number" step="0.010000" min="0" max="1" value="${row.probability}" 
@@ -200,6 +200,10 @@ function calculateExpectedValue(data) {
     return data.reduce((sum, item) => sum + item.value * item.prob, 0);
 }
 
+function calculateExpectedSquaredValue(data) {
+    return data.reduce((sum, item) => sum + item.value * item.value * item.prob, 0);
+}
+
 function calculateVariance(data, expectedValue) {
     const expectedSquare = data.reduce((sum, item) => sum + item.value * item.value * item.prob, 0);
     return expectedSquare - expectedValue * expectedValue;
@@ -226,31 +230,37 @@ function calculate() {
     }
 
     const expectedValue = calculateExpectedValue(data);
+    const expectedSquaredValue = calculateExpectedSquaredValue(data);
     const variance = calculateVariance(data, expectedValue);
     const stdDev = Math.sqrt(variance);
 
-    displayResults(expectedValue, variance, stdDev);
+    displayResults(expectedValue, expectedSquaredValue, variance, stdDev);
 }
 
-function displayResults(expectedValue, variance, stdDev) {
+function displayResults(expectedValue, expectedSquaredValue, variance, stdDev) {
     const container = document.getElementById("resultsContainer");
     container.innerHTML = `
     <div class="results">
         <h2>Results</h2>
         <div class="result-card">
             <div class="result-label">Expected Value (Mean)</div>
-            <div class="result-value">E(X) = ${expectedValue.toFixed(6)}</div>
-            <div class="result-formula">E(X) = Σ(x × P(x))</div>
+            <div class="result-value">M(X) = ${expectedValue.toFixed(6)}</div>
+            <div class="result-formula">M(X) = Σ(x × P(x))</div>
+        </div>
+        <div class="result-card">
+            <div class="result-label">Expected Cubed Value (Mean)</div>
+            <div class="result-value">M(X²) = ${expectedSquaredValue.toFixed(6)}</div>
+            <div class="result-formula">M(X²) = Σ(x² × P(x))</div>
         </div>
         <div class="result-card">
             <div class="result-label">Variance</div>
-            <div class="result-value">Var(X) = ${variance.toFixed(6)}</div>
-            <div class="result-formula">Var(X) = E(X²) - (E(X))²</div>
+            <div class="result-value">D(X) = ${variance.toFixed(6)}</div>
+            <div class="result-formula">D(X) = M(X²) - (M(X))²</div>
         </div>
         <div class="result-card">
             <div class="result-label">Standard Deviation</div>
             <div class="result-value">σ = ${stdDev.toFixed(6)}</div>
-            <div class="result-formula">σ = √Var(X)</div>
+            <div class="result-formula">σ = √D(X)</div>
         </div>
     </div>
 `;
