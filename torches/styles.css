@@ -1,0 +1,248 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+canvas {
+    border: 1px solid rgb(0, 0, 0);
+    background-color: #b70505a3;
+    margin: 10px;
+    width: 500px;
+    height: 500px;
+}
+
+#gameBoard {
+    margin: 0 auto;
+}
+
+#controls {
+    margin: 0 auto;
+    margin-top: 1px;
+    width: 700px;
+    display: flex;
+    background-color: #84e8c5c2;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+#torchButtons {
+    margin: 0 auto;
+    margin-top: 10px;
+    width: 500px;
+}
+
+@keyframes buttonHover {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes buttonClick {
+    0% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+.btn {
+    width: 100px;
+    height: 60px;
+    padding: 0;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 60px;
+}
+
+.btn:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#powerOn,
+#reset {
+    background-color: greenyellow;
+    width: 50px;
+    height: 200px;
+    padding: 0;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    text-align: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#powerOn:hover,
+#reset:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#powerOn:active,
+#reset:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#yellowTorchButton {
+    background-color: yellow;
+    transition: all 0.3s ease;
+}
+
+#yellowTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(255, 255, 0, 0.5);
+}
+
+#yellowTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#blueTorchButton {
+    background-color: deepskyblue;
+    transition: all 0.3s ease;
+}
+
+#blueTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(0, 191, 255, 0.5);
+}
+
+#blueTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#redTorchButton {
+    background-color: red;
+    transition: all 0.3s ease;
+}
+
+#redTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+}
+
+#redTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#greenTorchButton {
+    background-color: limegreen;
+    transition: all 0.3s ease;
+}
+
+#greenTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(50, 205, 50, 0.5);
+}
+
+#greenTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#purpleTorchButton {
+    background-color: purple;
+    transition: all 0.3s ease;
+}
+
+#purpleTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(128, 0, 128, 0.5);
+}
+
+#purpleTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#orangeTorchButton {
+    background-color: orange;
+    transition: all 0.3s ease;
+}
+
+#orangeTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(255, 165, 0, 0.5);
+}
+
+#orangeTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#whiteTorchButton {
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+#whiteTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.5);
+}
+
+#whiteTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#blackTorchButton {
+    background-color: black;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+#blackTorchButton:hover {
+    animation: buttonHover 0.3s ease forwards;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+}
+
+#blackTorchButton:active {
+    animation: buttonClick 0.2s ease forwards;
+}
+
+#difficulty {
+    width: 300px;
+    height: 20px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+#difficulty:focus {
+    outline: none;
+    border-color: #66afe9;
+    box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}
+#difficultyValue {
+    font-size: 18px;
+    margin-left: 10px;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Torches</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script src="script.js" defer></script>
+    </head>
+    <body>
+        <div id="gameBoard">
+            <canvas id="torchCanvas" width="500" height="500"></canvas><br />
+            <input type="range" id="difficulty" min="2" max="15" value="2" />
+            <span id="difficultyValue">Difficulty: 2</span>
+            <div id="controls">
+                <button id="powerOn" class="btn">Power On</button>
+                <div id="torchButtons">
+                    <button id="yellowTorchButton" class="btn"></button>
+                    <button id="blueTorchButton" class="btn"></button>
+                    <button id="redTorchButton" class="btn"></button>
+                    <button id="greenTorchButton" class="btn"></button>
+                    <button id="purpleTorchButton" class="btn"></button>
+                    <button id="orangeTorchButton" class="btn"></button>
+                    <button id="whiteTorchButton" class="btn"></button>
+                    <button id="blackTorchButton" class="btn"></button>
+                </div>
+                <button id="reset" class="btn">Reset</button>
+            </div>
+        </div>
+    </body>
+</html>
