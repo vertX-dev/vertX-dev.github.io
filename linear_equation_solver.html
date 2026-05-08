@@ -1,0 +1,247 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.wrap { padding: 1.5rem 0; max-width: 640px; }
+h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+textarea {
+  width: 100%; min-height: 120px; resize: vertical; font-family: var(--font-mono);
+  font-size: 14px; padding: 10px 12px; border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary);
+  color: var(--color-text-primary); line-height: 1.6;
+}
+textarea:focus { outline: none; border-color: var(--color-border-primary); }
+.btn-row { display: flex; gap: 8px; margin-top: 10px; }
+button {
+  padding: 8px 18px; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer;
+  border: 0.5px solid var(--color-border-secondary); background: transparent;
+  color: var(--color-text-primary); transition: background 0.12s;
+}
+button:hover { background: var(--color-background-secondary); }
+button.primary {
+  background: var(--color-text-primary); color: var(--color-background-primary);
+  border-color: transparent;
+}
+button.primary:hover { opacity: 0.85; }
+.result-box {
+  margin-top: 1.25rem; border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-tertiary); overflow: hidden;
+}
+.result-header {
+  padding: 10px 14px; background: var(--color-background-secondary);
+  font-size: 13px; font-weight: 500; color: var(--color-text-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.result-row {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.result-row:last-child { border-bottom: none; }
+.var-name { font-family: var(--font-mono); font-size: 15px; font-weight: 500; min-width: 28px; }
+.var-val { font-family: var(--font-mono); font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.var-check { font-size: 13px; color: var(--color-text-secondary); margin-left: auto; }
+.error-box {
+  margin-top: 1.25rem; padding: 12px 14px; border-radius: var(--border-radius-md);
+  background: var(--color-background-danger); border: 0.5px solid var(--color-border-danger);
+  color: var(--color-text-danger); font-size: 14px;
+}
+.steps-box {
+  margin-top: 1rem; border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-tertiary); overflow: hidden;
+}
+.steps-toggle {
+  width: 100%; text-align: left; padding: 9px 14px; font-size: 13px;
+  color: var(--color-text-secondary); background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.steps-content { padding: 0 14px 12px; display: none; }
+.steps-content.open { display: block; }
+.step-line { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary); line-height: 1.8; }
+</style>
+
+<div class="wrap">
+  <h2>Linear equation solver</h2>
+  <p class="sub">Enter one equation per line. Use any variable names (x, y, z, a, b…). Right-hand side can be 0 or any number.</p>
+  <textarea id="input" spellcheck="false">-0.88x - 0.18y - 0.08z - 0.64 = 0
+0.15x - 0.94y - 0.11z + 0.26 = 0
+0.04x - 0.1y + 1.09z + 1.34 = 0</textarea>
+  <div class="btn-row">
+    <button class="primary" onclick="solve()">Solve</button>
+    <button onclick="clearAll()">Clear</button>
+  </div>
+  <div id="output"></div>
+</div>
+
+<script>
+function parseEquations(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const varSet = new Set();
+  const tokenRe = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)|([+-]?\s*\d+\.?\d*)\s*(?=[=]|$)/g;
+
+  lines.forEach(line => {
+    const lhs = line.split('=')[0];
+    let m;
+    const re = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
+    while ((m = re.exec(lhs)) !== null) varSet.add(m[2]);
+  });
+
+  const vars = Array.from(varSet).sort();
+  const rows = [];
+
+  for (const line of lines) {
+    const parts = line.split('=');
+    if (parts.length !== 2) throw new Error('Each line must contain exactly one "="');
+    const lhs = parts[0];
+    const rhs = parseFloat(parts[1].trim());
+    if (isNaN(rhs)) throw new Error('Right-hand side must be a number: ' + parts[1]);
+
+    const coeffs = new Array(vars.length).fill(0);
+    let constant = 0;
+    const re2 = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)|(?<![a-zA-Z])([+-]?\s*\d+\.?\d*)(?!\s*\*?\s*[a-zA-Z])/g;
+    let m2;
+    let normalized = lhs.replace(/\s+/g, ' ');
+
+    const termRe = /(^|(?=[+-]))([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
+    const constRe = /(?<![a-zA-Z\d.])([+-]?\s*\d+\.?\d*)(?!\s*\*?\s*[a-zA-Z]|\d|\.)/g;
+
+    const terms = tokenizeLHS(lhs, vars);
+    terms.varCoeffs.forEach((v, i) => { coeffs[i] = v; });
+    constant = terms.constant;
+
+    rows.push({ coeffs, rhs: rhs - constant });
+  }
+
+  return { vars, rows };
+}
+
+function tokenizeLHS(lhs, vars) {
+  const varCoeffs = new Array(vars.length).fill(0);
+  let remaining = lhs.trim();
+
+  const varPattern = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
+  let m;
+  let usedRanges = [];
+
+  while ((m = varPattern.exec(lhs)) !== null) {
+    const coefStr = m[1].replace(/\s/g, '');
+    let coef;
+    if (coefStr === '' || coefStr === '+') coef = 1;
+    else if (coefStr === '-') coef = -1;
+    else coef = parseFloat(coefStr);
+    if (isNaN(coef)) coef = 1;
+
+    const varName = m[2];
+    const idx = vars.indexOf(varName);
+    if (idx !== -1) varCoeffs[idx] += coef;
+    usedRanges.push([m.index, m.index + m[0].length]);
+  }
+
+  let stripped = '';
+  let last = 0;
+  for (const [s, e] of usedRanges.sort((a, b) => a[0] - b[0])) {
+    stripped += lhs.slice(last, s);
+    last = e;
+  }
+  stripped += lhs.slice(last);
+
+  let constant = 0;
+  const constParts = stripped.match(/[+-]?\s*\d+\.?\d*/g);
+  if (constParts) constParts.forEach(p => { constant += parseFloat(p.replace(/\s/g, '')); });
+
+  return { varCoeffs, constant };
+}
+
+function gaussianElimination(vars, rows) {
+  const n = vars.length;
+  if (rows.length < n) throw new Error(`Need at least ${n} equations for ${n} unknowns (have ${rows.length})`);
+
+  const aug = rows.slice(0, n).map(r => [...r.coeffs, r.rhs]);
+  const steps = [];
+
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let r = col + 1; r < n; r++) {
+      if (Math.abs(aug[r][col]) > Math.abs(aug[maxRow][col])) maxRow = r;
+    }
+    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+
+    const pivot = aug[col][col];
+    if (Math.abs(pivot) < 1e-12) throw new Error('System has no unique solution (singular matrix)');
+
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const factor = aug[r][col] / pivot;
+      for (let c = col; c <= n; c++) aug[r][c] -= factor * aug[col][c];
+    }
+
+    steps.push(`Eliminated column ${col + 1} (pivot = ${pivot.toFixed(4)})`);
+  }
+
+  const solution = {};
+  for (let i = 0; i < n; i++) {
+    solution[vars[i]] = aug[i][n] / aug[i][i];
+  }
+  return { solution, steps };
+}
+
+function verify(vars, rows, solution) {
+  return rows.map((row, i) => {
+    let sum = 0;
+    vars.forEach((v, j) => { sum += row.coeffs[j] * solution[v]; });
+    const diff = Math.abs(sum - row.rhs);
+    return diff < 1e-8;
+  });
+}
+
+function solve() {
+  const text = document.getElementById('input').value;
+  const out = document.getElementById('output');
+  try {
+    const { vars, rows } = parseEquations(text);
+    if (vars.length === 0) throw new Error('No variables found in input');
+    const { solution, steps } = gaussianElimination(vars, rows);
+    const checks = verify(vars, rows, solution);
+    const allOk = checks.every(Boolean);
+
+    let html = '<div class="result-box"><div class="result-header">Solution</div>';
+    vars.forEach(v => {
+      const val = solution[v];
+      const disp = Math.abs(val) < 1e-10 ? '0' : val.toFixed(6).replace(/\.?0+$/, '');
+      html += `<div class="result-row">
+        <span class="var-name">${v}</span>
+        <span style="color:var(--color-text-secondary);font-size:15px">=</span>
+        <span class="var-val">${disp}</span>
+        <span class="var-check">${allOk ? 'verified' : 'check failed'}</span>
+      </div>`;
+    });
+    html += '</div>';
+
+    html += `<div class="steps-box">
+      <button class="steps-toggle" onclick="toggleSteps(this)">
+        <span>Show elimination steps</span><i class="ti ti-chevron-down" aria-hidden="true"></i>
+      </button>
+      <div class="steps-content">
+        ${steps.map(s => `<div class="step-line">${s}</div>`).join('')}
+      </div>
+    </div>`;
+
+    out.innerHTML = html;
+  } catch (e) {
+    out.innerHTML = `<div class="error-box">${e.message}</div>`;
+  }
+}
+
+function toggleSteps(btn) {
+  const c = btn.nextElementSibling;
+  const open = c.classList.toggle('open');
+  btn.querySelector('span').textContent = open ? 'Hide elimination steps' : 'Show elimination steps';
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('output').innerHTML = '';
+}
+
+solve();
+</script>
