@@ -1,8 +1,7 @@
-
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-sans); }
-.wrap { padding: 1.5rem 0; max-width: 640px; }
+.wrap { padding: 1.5rem 0; max-width: 660px; }
 h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
 .sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
 textarea {
@@ -55,9 +54,41 @@ button.primary:hover { opacity: 0.85; }
   color: var(--color-text-secondary); background: none; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: space-between;
 }
-.steps-content { padding: 0 14px 12px; display: none; }
+.steps-content { padding: 0 14px 14px; display: none; }
 .steps-content.open { display: block; }
-.step-line { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary); line-height: 1.8; }
+.step-block { margin-top: 14px; }
+.step-label {
+  font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono);
+  margin-bottom: 6px; padding: 3px 0;
+}
+.step-label em { font-style: normal; color: var(--color-text-primary); font-weight: 500; }
+.mat-wrap { overflow-x: auto; }
+table.mat {
+  border-collapse: collapse; font-family: var(--font-mono); font-size: 12px;
+  width: 100%; table-layout: auto;
+}
+table.mat th {
+  padding: 5px 10px; text-align: center; font-weight: 500; font-size: 11px;
+  color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary);
+  white-space: nowrap;
+}
+table.mat td {
+  padding: 5px 10px; text-align: right; white-space: nowrap;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  color: var(--color-text-primary);
+}
+table.mat tr:last-child td { border-bottom: none; }
+table.mat td.rhs-cell {
+  border-left: 0.5px solid var(--color-border-secondary);
+  color: var(--color-text-secondary);
+}
+table.mat td.pivot-col { background: var(--color-background-secondary); }
+table.mat tr.pivot-row td { color: var(--color-text-primary); opacity: 0.55; }
+table.mat td.zero { color: var(--color-text-tertiary); }
+table.mat td.row-label {
+  color: var(--color-text-secondary); font-size: 11px; text-align: left;
+  padding-left: 0; min-width: 28px; border-bottom: 0.5px solid var(--color-border-tertiary);
+}
 </style>
 
 <div class="wrap">
@@ -77,52 +108,30 @@ button.primary:hover { opacity: 0.85; }
 function parseEquations(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const varSet = new Set();
-  const tokenRe = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)|([+-]?\s*\d+\.?\d*)\s*(?=[=]|$)/g;
-
   lines.forEach(line => {
     const lhs = line.split('=')[0];
-    let m;
     const re = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
+    let m;
     while ((m = re.exec(lhs)) !== null) varSet.add(m[2]);
   });
-
   const vars = Array.from(varSet).sort();
   const rows = [];
-
   for (const line of lines) {
     const parts = line.split('=');
     if (parts.length !== 2) throw new Error('Each line must contain exactly one "="');
-    const lhs = parts[0];
     const rhs = parseFloat(parts[1].trim());
     if (isNaN(rhs)) throw new Error('Right-hand side must be a number: ' + parts[1]);
-
-    const coeffs = new Array(vars.length).fill(0);
-    let constant = 0;
-    const re2 = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)|(?<![a-zA-Z])([+-]?\s*\d+\.?\d*)(?!\s*\*?\s*[a-zA-Z])/g;
-    let m2;
-    let normalized = lhs.replace(/\s+/g, ' ');
-
-    const termRe = /(^|(?=[+-]))([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
-    const constRe = /(?<![a-zA-Z\d.])([+-]?\s*\d+\.?\d*)(?!\s*\*?\s*[a-zA-Z]|\d|\.)/g;
-
-    const terms = tokenizeLHS(lhs, vars);
-    terms.varCoeffs.forEach((v, i) => { coeffs[i] = v; });
-    constant = terms.constant;
-
-    rows.push({ coeffs, rhs: rhs - constant });
+    const terms = tokenizeLHS(parts[0], vars);
+    rows.push({ coeffs: terms.varCoeffs, rhs: rhs - terms.constant });
   }
-
   return { vars, rows };
 }
 
 function tokenizeLHS(lhs, vars) {
   const varCoeffs = new Array(vars.length).fill(0);
-  let remaining = lhs.trim();
-
   const varPattern = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
   let m;
-  let usedRanges = [];
-
+  const usedRanges = [];
   while ((m = varPattern.exec(lhs)) !== null) {
     const coefStr = m[1].replace(/\s/g, '');
     let coef;
@@ -130,13 +139,10 @@ function tokenizeLHS(lhs, vars) {
     else if (coefStr === '-') coef = -1;
     else coef = parseFloat(coefStr);
     if (isNaN(coef)) coef = 1;
-
-    const varName = m[2];
-    const idx = vars.indexOf(varName);
+    const idx = vars.indexOf(m[2]);
     if (idx !== -1) varCoeffs[idx] += coef;
     usedRanges.push([m.index, m.index + m[0].length]);
   }
-
   let stripped = '';
   let last = 0;
   for (const [s, e] of usedRanges.sort((a, b) => a[0] - b[0])) {
@@ -144,27 +150,45 @@ function tokenizeLHS(lhs, vars) {
     last = e;
   }
   stripped += lhs.slice(last);
-
   let constant = 0;
   const constParts = stripped.match(/[+-]?\s*\d+\.?\d*/g);
   if (constParts) constParts.forEach(p => { constant += parseFloat(p.replace(/\s/g, '')); });
-
   return { varCoeffs, constant };
+}
+
+function fmtNum(v) {
+  if (Math.abs(v) < 1e-10) return '0';
+  const s = parseFloat(v.toFixed(6));
+  return s.toString();
+}
+
+function cloneAug(aug) {
+  return aug.map(r => [...r]);
 }
 
 function gaussianElimination(vars, rows) {
   const n = vars.length;
   if (rows.length < n) throw new Error(`Need at least ${n} equations for ${n} unknowns (have ${rows.length})`);
-
   const aug = rows.slice(0, n).map(r => [...r.coeffs, r.rhs]);
-  const steps = [];
+  const snapshots = [];
+
+  snapshots.push({ label: 'Initial augmented matrix', matrix: cloneAug(aug), pivotCol: -1, pivotRow: -1, op: null });
 
   for (let col = 0; col < n; col++) {
     let maxRow = col;
     for (let r = col + 1; r < n; r++) {
       if (Math.abs(aug[r][col]) > Math.abs(aug[maxRow][col])) maxRow = r;
     }
-    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+    if (maxRow !== col) {
+      [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+      snapshots.push({
+        label: `Pivot: swap R${col + 1} ↔ R${maxRow + 1}`,
+        matrix: cloneAug(aug),
+        pivotCol: col,
+        pivotRow: col,
+        op: `swap`
+      });
+    }
 
     const pivot = aug[col][col];
     if (Math.abs(pivot) < 1e-12) throw new Error('System has no unique solution (singular matrix)');
@@ -172,26 +196,60 @@ function gaussianElimination(vars, rows) {
     for (let r = 0; r < n; r++) {
       if (r === col) continue;
       const factor = aug[r][col] / pivot;
+      if (Math.abs(factor) < 1e-14) continue;
       for (let c = col; c <= n; c++) aug[r][c] -= factor * aug[col][c];
+      snapshots.push({
+        label: `R${r + 1} ← R${r + 1} − (${fmtNum(factor)}) · R${col + 1}`,
+        matrix: cloneAug(aug),
+        pivotCol: col,
+        pivotRow: col,
+        op: `elim`,
+        targetRow: r
+      });
     }
-
-    steps.push(`Eliminated column ${col + 1} (pivot = ${pivot.toFixed(4)})`);
   }
+
+  snapshots.push({ label: 'Reduced row echelon form', matrix: cloneAug(aug), pivotCol: -1, pivotRow: -1, op: 'final' });
 
   const solution = {};
-  for (let i = 0; i < n; i++) {
-    solution[vars[i]] = aug[i][n] / aug[i][i];
-  }
-  return { solution, steps };
+  for (let i = 0; i < n; i++) solution[vars[i]] = aug[i][n] / aug[i][i];
+  return { solution, snapshots };
 }
 
 function verify(vars, rows, solution) {
-  return rows.map((row, i) => {
+  return rows.map(row => {
     let sum = 0;
     vars.forEach((v, j) => { sum += row.coeffs[j] * solution[v]; });
-    const diff = Math.abs(sum - row.rhs);
-    return diff < 1e-8;
+    return Math.abs(sum - row.rhs) < 1e-8;
   });
+}
+
+function renderMatrix(snap, vars) {
+  const n = vars.length;
+  const mat = snap.matrix;
+  let html = '<div class="mat-wrap"><table class="mat"><thead><tr>';
+  html += '<th></th>';
+  vars.forEach(v => { html += `<th>${v}</th>`; });
+  html += '<th class="rhs-cell">RHS</th></tr></thead><tbody>';
+  for (let r = 0; r < mat.length; r++) {
+    const isTarget = snap.op === 'elim' && r === snap.targetRow;
+    html += `<tr${isTarget ? '' : ''}>`;
+    html += `<td class="row-label">R${r + 1}</td>`;
+    for (let c = 0; c <= n; c++) {
+      const val = mat[r][c];
+      const isRhs = c === n;
+      const isPivotCol = c === snap.pivotCol;
+      const isZero = Math.abs(val) < 1e-10;
+      let cls = '';
+      if (isRhs) cls += ' rhs-cell';
+      if (isPivotCol && !isRhs) cls += ' pivot-col';
+      if (isZero) cls += ' zero';
+      html += `<td class="${cls.trim()}">${fmtNum(val)}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  return html;
 }
 
 function solve() {
@@ -200,7 +258,7 @@ function solve() {
   try {
     const { vars, rows } = parseEquations(text);
     if (vars.length === 0) throw new Error('No variables found in input');
-    const { solution, steps } = gaussianElimination(vars, rows);
+    const { solution, snapshots } = gaussianElimination(vars, rows);
     const checks = verify(vars, rows, solution);
     const allOk = checks.every(Boolean);
 
@@ -218,14 +276,20 @@ function solve() {
     html += '</div>';
 
     html += `<div class="steps-box">
-      <button class="steps-toggle" onclick="toggleSteps(this)">
-        <span>Show elimination steps</span><i class="ti ti-chevron-down" aria-hidden="true"></i>
+      <button class="steps-toggle" onclick="toggleSteps(this)" aria-expanded="false">
+        <span>Show elimination steps (${snapshots.length} matrices)</span>
+        <i class="ti ti-chevron-down" aria-hidden="true"></i>
       </button>
-      <div class="steps-content">
-        ${steps.map(s => `<div class="step-line">${s}</div>`).join('')}
-      </div>
-    </div>`;
+      <div class="steps-content">`;
 
+    snapshots.forEach((snap, i) => {
+      html += `<div class="step-block">
+        <div class="step-label">${i === 0 ? snap.label : `<em>${snap.label}</em>`}</div>
+        ${renderMatrix(snap, vars)}
+      </div>`;
+    });
+
+    html += '</div></div>';
     out.innerHTML = html;
   } catch (e) {
     out.innerHTML = `<div class="error-box">${e.message}</div>`;
@@ -235,7 +299,11 @@ function solve() {
 function toggleSteps(btn) {
   const c = btn.nextElementSibling;
   const open = c.classList.toggle('open');
-  btn.querySelector('span').textContent = open ? 'Hide elimination steps' : 'Show elimination steps';
+  btn.setAttribute('aria-expanded', open);
+  btn.querySelector('span').textContent = open
+    ? btn.querySelector('span').textContent.replace('Show', 'Hide')
+    : btn.querySelector('span').textContent.replace('Hide', 'Show');
+  btn.querySelector('.ti').className = open ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
 }
 
 function clearAll() {
