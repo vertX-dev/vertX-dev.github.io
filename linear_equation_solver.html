@@ -1,137 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Розв'язання СЛАР методом Гауса</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-.wrap { padding: 1.5rem 0; max-width: 660px; }
-h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
-.sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+body { font-family: var(--font-sans, system-ui, sans-serif); }
+.wrap { padding: 1.5rem 0; max-width: 720px; }
+h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary, #111); margin-bottom: 4px; }
+.sub { font-size: 14px; color: var(--color-text-secondary, #666); margin-bottom: 1.25rem; }
+
 textarea {
-  width: 100%; min-height: 120px; resize: vertical; font-family: var(--font-mono);
-  font-size: 14px; padding: 10px 12px; border-radius: var(--border-radius-md);
-  border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary);
-  color: var(--color-text-primary); line-height: 1.6;
+  width: 100%; min-height: 120px; resize: vertical;
+  font-family: var(--font-mono, monospace);
+  font-size: 14px; padding: 10px 12px;
+  border-radius: var(--border-radius-md, 6px);
+  border: 0.5px solid var(--color-border-secondary, #ccc);
+  background: var(--color-background-primary, #fff);
+  color: var(--color-text-primary, #111); line-height: 1.6;
 }
-textarea:focus { outline: none; border-color: var(--color-border-primary); }
+textarea:focus { outline: none; border-color: var(--color-border-primary, #888); }
+
 .btn-row { display: flex; gap: 8px; margin-top: 10px; }
 button {
-  padding: 8px 18px; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer;
-  border: 0.5px solid var(--color-border-secondary); background: transparent;
-  color: var(--color-text-primary); transition: background 0.12s;
+  padding: 8px 18px; border-radius: var(--border-radius-md, 6px);
+  font-size: 14px; cursor: pointer;
+  border: 0.5px solid var(--color-border-secondary, #ccc);
+  background: transparent; color: var(--color-text-primary, #111);
+  transition: background 0.12s;
 }
-button:hover { background: var(--color-background-secondary); }
+button:hover { background: var(--color-background-secondary, #f5f5f5); }
 button.primary {
-  background: var(--color-text-primary); color: var(--color-background-primary);
+  background: var(--color-text-primary, #111);
+  color: var(--color-background-primary, #fff);
   border-color: transparent;
 }
 button.primary:hover { opacity: 0.85; }
+
+/* Solution result box */
 .result-box {
-  margin-top: 1.25rem; border-radius: var(--border-radius-lg);
-  border: 0.5px solid var(--color-border-tertiary); overflow: hidden;
+  margin-top: 1.25rem;
+  border-radius: var(--border-radius-lg, 8px);
+  border: 0.5px solid var(--color-border-tertiary, #e0e0e0);
+  overflow: hidden;
 }
 .result-header {
-  padding: 10px 14px; background: var(--color-background-secondary);
-  font-size: 13px; font-weight: 500; color: var(--color-text-secondary);
-  border-bottom: 0.5px solid var(--color-border-tertiary);
+  padding: 10px 14px;
+  background: var(--color-background-secondary, #f5f5f5);
+  font-size: 13px; font-weight: 500;
+  color: var(--color-text-secondary, #666);
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e0e0e0);
 }
 .result-row {
   display: flex; align-items: baseline; gap: 8px;
-  padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary);
+  padding: 10px 14px;
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e0e0e0);
 }
 .result-row:last-child { border-bottom: none; }
-.var-name { font-family: var(--font-mono); font-size: 15px; font-weight: 500; min-width: 28px; }
-.var-val { font-family: var(--font-mono); font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
-.var-check { font-size: 13px; color: var(--color-text-secondary); margin-left: auto; }
+.var-name { font-family: var(--font-mono, monospace); font-size: 15px; font-weight: 500; min-width: 28px; }
+.var-val { font-family: var(--font-mono, monospace); font-size: 20px; font-weight: 500; color: var(--color-text-primary, #111); }
+.var-check { font-size: 13px; color: var(--color-text-secondary, #666); margin-left: auto; }
+
 .error-box {
-  margin-top: 1.25rem; padding: 12px 14px; border-radius: var(--border-radius-md);
-  background: var(--color-background-danger); border: 0.5px solid var(--color-border-danger);
-  color: var(--color-text-danger); font-size: 14px;
+  margin-top: 1.25rem; padding: 12px 14px;
+  border-radius: var(--border-radius-md, 6px);
+  background: var(--color-background-danger, #fff0f0);
+  border: 0.5px solid var(--color-border-danger, #f5c6c6);
+  color: var(--color-text-danger, #c00);
+  font-size: 14px;
 }
-.steps-box {
-  margin-top: 1rem; border-radius: var(--border-radius-md);
-  border: 0.5px solid var(--color-border-tertiary); overflow: hidden;
+
+/* Blank table */
+.blank-wrap {
+  margin-top: 1.5rem;
+  border-radius: var(--border-radius-lg, 8px);
+  border: 0.5px solid var(--color-border-tertiary, #e0e0e0);
+  overflow: hidden;
 }
-.steps-toggle {
-  width: 100%; text-align: left; padding: 9px 14px; font-size: 13px;
-  color: var(--color-text-secondary); background: none; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
+.blank-title {
+  padding: 10px 14px;
+  background: var(--color-background-secondary, #f5f5f5);
+  font-size: 13px; font-weight: 600;
+  color: var(--color-text-primary, #111);
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e0e0e0);
+  letter-spacing: 0.02em;
 }
-.steps-content { padding: 0 14px 14px; display: none; }
-.steps-content.open { display: block; }
-.step-block { margin-top: 14px; }
-.step-label {
-  font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono);
-  margin-bottom: 6px; padding: 3px 0;
+.blank-scroll { overflow-x: auto; }
+
+table.blank {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
 }
-.step-label em { font-style: normal; color: var(--color-text-primary); font-weight: 500; }
-.mat-wrap { overflow-x: auto; }
-table.mat {
-  border-collapse: collapse; font-family: var(--font-mono); font-size: 12px;
-  width: 100%; table-layout: auto;
-}
-table.mat th {
-  padding: 5px 10px; text-align: center; font-weight: 500; font-size: 11px;
-  color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary);
+table.blank th, table.blank td {
+  padding: 7px 10px; text-align: center;
+  border: 0.5px solid var(--color-border-tertiary, #e0e0e0);
   white-space: nowrap;
 }
-table.mat td {
-  padding: 5px 10px; text-align: right; white-space: nowrap;
-  border-bottom: 0.5px solid var(--color-border-tertiary);
-  color: var(--color-text-primary);
+table.blank thead th {
+  background: var(--color-background-secondary, #f5f5f5);
+  font-weight: 600; font-size: 12px;
+  color: var(--color-text-secondary, #666);
+  font-family: var(--font-sans, system-ui, sans-serif);
 }
-table.mat tr:last-child td { border-bottom: none; }
-table.mat td.rhs-cell {
-  border-left: 0.5px solid var(--color-border-secondary);
-  color: var(--color-text-secondary);
+table.blank thead th.var-col {
+  color: var(--color-text-primary, #111);
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
 }
-table.mat td.pivot-col { background: var(--color-background-secondary); }
-table.mat tr.pivot-row td { color: var(--color-text-primary); opacity: 0.55; }
-table.mat td.zero { color: var(--color-text-tertiary); }
-table.mat td.row-label {
-  color: var(--color-text-secondary); font-size: 11px; text-align: left;
-  padding-left: 0; min-width: 28px; border-bottom: 0.5px solid var(--color-border-tertiary);
+table.blank td.stage-cell {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-weight: 600; font-size: 12px;
+  color: var(--color-text-secondary, #666);
+  background: var(--color-background-secondary, #f5f5f5);
+  vertical-align: middle;
+}
+table.blank td.row-num {
+  color: var(--color-text-secondary, #666);
+  font-size: 11px; font-family: var(--font-sans, system-ui, sans-serif);
+}
+table.blank tr.control-row td {
+  background: color-mix(in srgb, var(--color-background-secondary, #f5f5f5) 60%, transparent);
+  color: var(--color-text-secondary, #666);
+  font-style: italic;
+}
+table.blank tr.solution-row td {
+  font-weight: 600;
+  color: var(--color-text-primary, #111);
+}
+table.blank td.sum-col {
+  color: var(--color-text-secondary, #555);
+  border-left: 1px solid var(--color-border-secondary, #ccc);
+}
+table.blank td.b-col {
+  border-left: 1px solid var(--color-border-secondary, #ccc);
+}
+table.blank tr.stage-divider td {
+  padding: 0; height: 3px;
+  background: var(--color-border-secondary, #ccc);
+  border: none;
 }
 </style>
-
+</head>
+<body>
 <div class="wrap">
-  <h2>Linear equation solver</h2>
-  <p class="sub">Enter one equation per line. Use any variable names (x, y, z, a, b…). Right-hand side can be 0 or any number.</p>
+  <h2>Розв'язання СЛАР методом Гауса</h2>
+  <p class="sub">Введіть одне рівняння на рядок. Можна використовувати будь-які імена змінних (x, y, z…). Права частина — число.</p>
   <textarea id="input" spellcheck="false">-0.88x - 0.18y - 0.08z - 0.64 = 0
 0.15x - 0.94y - 0.11z + 0.26 = 0
 0.04x - 0.1y + 1.09z + 1.34 = 0</textarea>
   <div class="btn-row">
-    <button class="primary" onclick="solve()">Solve</button>
-    <button onclick="clearAll()">Clear</button>
+    <button class="primary" onclick="solve()">Розв'язати</button>
+    <button onclick="clearAll()">Очистити</button>
   </div>
   <div id="output"></div>
 </div>
 
 <script>
-function parseEquations(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  const varSet = new Set();
-  lines.forEach(line => {
-    const lhs = line.split('=')[0];
-    const re = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
-    let m;
-    while ((m = re.exec(lhs)) !== null) varSet.add(m[2]);
-  });
-  const vars = Array.from(varSet).sort();
-  const rows = [];
-  for (const line of lines) {
-    const parts = line.split('=');
-    if (parts.length !== 2) throw new Error('Each line must contain exactly one "="');
-    const rhs = parseFloat(parts[1].trim());
-    if (isNaN(rhs)) throw new Error('Right-hand side must be a number: ' + parts[1]);
-    const terms = tokenizeLHS(parts[0], vars);
-    rows.push({ coeffs: terms.varCoeffs, rhs: rhs - terms.constant });
-  }
-  return { vars, rows };
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+function fmtNum(v) {
+  if (Math.abs(v) < 1e-10) return '0';
+  const s = v.toFixed(6).replace(/\.?0+$/, '');
+  return s;
 }
+
+function rowSum(row) {
+  return row.reduce((a, b) => a + b, 0);
+}
+
+function deepCopy(m) {
+  return m.map(r => [...r]);
+}
+
+// ─── parsing ─────────────────────────────────────────────────────────────────
 
 function tokenizeLHS(lhs, vars) {
   const varCoeffs = new Array(vars.length).fill(0);
   const varPattern = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
   let m;
   const usedRanges = [];
+
   while ((m = varPattern.exec(lhs)) !== null) {
     const coefStr = m[1].replace(/\s/g, '');
     let coef;
@@ -139,10 +188,12 @@ function tokenizeLHS(lhs, vars) {
     else if (coefStr === '-') coef = -1;
     else coef = parseFloat(coefStr);
     if (isNaN(coef)) coef = 1;
+
     const idx = vars.indexOf(m[2]);
     if (idx !== -1) varCoeffs[idx] += coef;
     usedRanges.push([m.index, m.index + m[0].length]);
   }
+
   let stripped = '';
   let last = 0;
   for (const [s, e] of usedRanges.sort((a, b) => a[0] - b[0])) {
@@ -150,160 +201,231 @@ function tokenizeLHS(lhs, vars) {
     last = e;
   }
   stripped += lhs.slice(last);
+
   let constant = 0;
   const constParts = stripped.match(/[+-]?\s*\d+\.?\d*/g);
   if (constParts) constParts.forEach(p => { constant += parseFloat(p.replace(/\s/g, '')); });
+
   return { varCoeffs, constant };
 }
 
-function fmtNum(v) {
-  if (Math.abs(v) < 1e-10) return '0';
-  const s = parseFloat(v.toFixed(6));
-  return s.toString();
+function parseEquations(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const varSet = new Set();
+
+  lines.forEach(line => {
+    const lhs = line.split('=')[0];
+    const re = /([+-]?\s*\d*\.?\d*)\s*\*?\s*([a-zA-Z]+)/g;
+    let m;
+    while ((m = re.exec(lhs)) !== null) varSet.add(m[2]);
+  });
+
+  const vars = Array.from(varSet).sort();
+  const rows = [];
+
+  for (const line of lines) {
+    const parts = line.split('=');
+    if (parts.length !== 2) throw new Error('Кожен рядок повинен містити рівно один знак "="');
+    const rhs = parseFloat(parts[1].trim());
+    if (isNaN(rhs)) throw new Error('Права частина повинна бути числом: ' + parts[1]);
+
+    const terms = tokenizeLHS(parts[0], vars);
+    rows.push({ coeffs: terms.varCoeffs, rhs: rhs - terms.constant });
+  }
+
+  return { vars, rows };
 }
 
-function cloneAug(aug) {
-  return aug.map(r => [...r]);
-}
+// ─── elimination ─────────────────────────────────────────────────────────────
 
 function gaussianElimination(vars, rows) {
   const n = vars.length;
-  if (rows.length < n) throw new Error(`Need at least ${n} equations for ${n} unknowns (have ${rows.length})`);
-  const aug = rows.slice(0, n).map(r => [...r.coeffs, r.rhs]);
-  const snapshots = [];
+  if (rows.length < n) throw new Error(`Потрібно щонайменше ${n} рівнянь для ${n} невідомих (є ${rows.length})`);
 
-  snapshots.push({ label: 'Initial augmented matrix', matrix: cloneAug(aug), pivotCol: -1, pivotRow: -1, op: null });
+  const aug = rows.slice(0, n).map(r => [...r.coeffs, r.rhs]);
+
+  // snapshots[i] = стан aug ПІСЛЯ кроку i (перед наступним)
+  // snapshot[0] = початковий стан (A1)
+  const snapshots = [deepCopy(aug)];
 
   for (let col = 0; col < n; col++) {
     let maxRow = col;
     for (let r = col + 1; r < n; r++) {
       if (Math.abs(aug[r][col]) > Math.abs(aug[maxRow][col])) maxRow = r;
     }
-    if (maxRow !== col) {
-      [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
-      snapshots.push({
-        label: `Pivot: swap R${col + 1} ↔ R${maxRow + 1}`,
-        matrix: cloneAug(aug),
-        pivotCol: col,
-        pivotRow: col,
-        op: `swap`
-      });
-    }
+    [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
 
     const pivot = aug[col][col];
-    if (Math.abs(pivot) < 1e-12) throw new Error('System has no unique solution (singular matrix)');
+    if (Math.abs(pivot) < 1e-12) throw new Error('Система не має єдиного розв\'язку (виродженя матриця)');
 
     for (let r = 0; r < n; r++) {
       if (r === col) continue;
       const factor = aug[r][col] / pivot;
-      if (Math.abs(factor) < 1e-14) continue;
       for (let c = col; c <= n; c++) aug[r][c] -= factor * aug[col][c];
-      snapshots.push({
-        label: `R${r + 1} ← R${r + 1} − (${fmtNum(factor)}) · R${col + 1}`,
-        matrix: cloneAug(aug),
-        pivotCol: col,
-        pivotRow: col,
-        op: `elim`,
-        targetRow: r
-      });
     }
+
+    snapshots.push(deepCopy(aug));
   }
 
-  snapshots.push({ label: 'Reduced row echelon form', matrix: cloneAug(aug), pivotCol: -1, pivotRow: -1, op: 'final' });
-
   const solution = {};
-  for (let i = 0; i < n; i++) solution[vars[i]] = aug[i][n] / aug[i][i];
+  for (let i = 0; i < n; i++) {
+    solution[vars[i]] = aug[i][n] / aug[i][i];
+  }
+
   return { solution, snapshots };
 }
 
-function verify(vars, rows, solution) {
-  return rows.map(row => {
+// ─── blank rendering ──────────────────────────────────────────────────────────
+
+function buildControlRow(matrix) {
+  // контрольний рядок: coeffs = [-1, -1, ...], b = сума всіх b (остання колонка)
+  const n = matrix[0].length - 1;
+  const ctrl = new Array(n + 1).fill(-1);
+  // Y для контрольного = сума всіх Y рядків матриці
+  const totalY = matrix.reduce((acc, row) => acc + rowSum(row), 0);
+  return { row: ctrl, y: totalY };
+}
+
+function renderBlank(vars, snapshots) {
+  const n = vars.length;
+  // Кількість етапів A = n (A1 = початок, A2..An = після кожного кроку елімінації, крім останнього)
+  // snapshots має n+1 елементів: [initial, after_step0, after_step1, ..., after_step_n-1]
+  // A1 = snapshots[0], A2 = snapshots[1], ..., An = snapshots[n-1]
+  // Після останнього кроку (snapshots[n]) — це вже діагональна матриця, показуємо як An
+
+  let rowIdx = 1;
+
+  // header
+  let html = '<div class="blank-wrap"><div class="blank-title">Розрахунковий бланк</div><div class="blank-scroll"><table class="blank">';
+
+  // thead
+  html += '<thead><tr>';
+  html += '<th>Етап</th><th>№</th>';
+  for (let i = 0; i < n; i++) html += `<th class="var-col">${vars[i]}</th>`;
+  html += '<th class="b-col">b</th>';
+  html += '<th class="sum-col">Y</th>';
+  html += '</tr></thead><tbody>';
+
+  // stages A1 .. An (snapshots[0] .. snapshots[n-1])
+  // After n steps we show final diagonal as last A stage
+  const stagesCount = n; // A1..An
+
+  for (let s = 0; s < stagesCount; s++) {
+    const mat = snapshots[s];
+    const label = `A${s + 1}`;
+
+    // рядки матриці на цьому етапі: показуємо всі n рядків
+    const rowsInStage = mat;
+    const ctrl = buildControlRow(mat);
+    const totalRows = rowsInStage.length + 1; // +1 для контрольного
+
+    for (let r = 0; r < rowsInStage.length; r++) {
+      const row = rowsInStage[r];
+      const y = rowSum(row);
+      html += '<tr>';
+      if (r === 0) {
+        html += `<td class="stage-cell" rowspan="${totalRows}">${label}</td>`;
+      }
+      html += `<td class="row-num">${rowIdx++}</td>`;
+      for (let c = 0; c < n; c++) html += `<td>${fmtNum(row[c])}</td>`;
+      html += `<td class="b-col">${fmtNum(row[n])}</td>`;
+      html += `<td class="sum-col">${fmtNum(y)}</td>`;
+      html += '</tr>';
+    }
+
+    // контрольний рядок
+    html += '<tr class="control-row">';
+    html += `<td class="row-num">${rowIdx++}</td>`;
+    for (let c = 0; c < n; c++) html += `<td>${fmtNum(ctrl.row[c])}</td>`;
+    html += `<td class="b-col">${fmtNum(ctrl.row[n])}</td>`;
+    html += `<td class="sum-col">${fmtNum(ctrl.y)}</td>`;
+    html += '</tr>';
+
+    // divider between stages
+    if (s < stagesCount - 1) {
+      html += `<tr class="stage-divider"><td colspan="${n + 3}"></td></tr>`;
+    }
+  }
+
+  // stage B: розв'язки з останнього знімку (діагональна матриця)
+  const finalMat = snapshots[n]; // повністю елімінована
+  html += `<tr class="stage-divider"><td colspan="${n + 3}"></td></tr>`;
+
+  for (let i = 0; i < n; i++) {
+    const val = finalMat[i][n] / finalMat[i][i];
+    html += '<tr class="solution-row">';
+    if (i === 0) html += `<td class="stage-cell" rowspan="${n + 1}">B</td>`;
+    html += `<td class="row-num">${rowIdx++}</td>`;
+    for (let c = 0; c < n; c++) {
+      if (c === i) html += `<td>${fmtNum(val)}</td>`;
+      else html += '<td></td>';
+    }
+    html += `<td class="b-col"></td>`;
+    html += `<td class="sum-col"></td>`;
+    html += '</tr>';
+  }
+
+  // перевірочний рядок B: підстановка розв'язків
+  const solution = {};
+  for (let i = 0; i < n; i++) solution[vars[i]] = finalMat[i][n] / finalMat[i][i];
+
+  const checkVals = snapshots[0].map(row => {
+    let sum = 0;
+    for (let c = 0; c < n; c++) sum += row[c] * solution[vars[c]];
+    return sum - row[n];
+  });
+
+  html += '<tr class="control-row">';
+  html += `<td class="row-num">${rowIdx++}</td>`;
+  for (let c = 0; c < n; c++) html += `<td>${fmtNum(solution[vars[c]])}</td>`;
+  const checkY = Object.values(solution).reduce((a, b) => a + b, 0);
+  html += `<td class="b-col"></td>`;
+  html += `<td class="sum-col">${fmtNum(checkY)}</td>`;
+  html += '</tr>';
+
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+// ─── solution display ─────────────────────────────────────────────────────────
+
+function renderSolution(vars, solution, rows) {
+  const checks = rows.map(row => {
     let sum = 0;
     vars.forEach((v, j) => { sum += row.coeffs[j] * solution[v]; });
     return Math.abs(sum - row.rhs) < 1e-8;
   });
-}
+  const allOk = checks.every(Boolean);
 
-function renderMatrix(snap, vars) {
-  const n = vars.length;
-  const mat = snap.matrix;
-  let html = '<div class="mat-wrap"><table class="mat"><thead><tr>';
-  html += '<th></th>';
-  vars.forEach(v => { html += `<th>${v}</th>`; });
-  html += '<th class="rhs-cell">RHS</th></tr></thead><tbody>';
-  for (let r = 0; r < mat.length; r++) {
-    const isTarget = snap.op === 'elim' && r === snap.targetRow;
-    html += `<tr${isTarget ? '' : ''}>`;
-    html += `<td class="row-label">R${r + 1}</td>`;
-    for (let c = 0; c <= n; c++) {
-      const val = mat[r][c];
-      const isRhs = c === n;
-      const isPivotCol = c === snap.pivotCol;
-      const isZero = Math.abs(val) < 1e-10;
-      let cls = '';
-      if (isRhs) cls += ' rhs-cell';
-      if (isPivotCol && !isRhs) cls += ' pivot-col';
-      if (isZero) cls += ' zero';
-      html += `<td class="${cls.trim()}">${fmtNum(val)}</td>`;
-    }
-    html += '</tr>';
-  }
-  html += '</tbody></table></div>';
+  let html = '<div class="result-box"><div class="result-header">Розв\'язок</div>';
+  vars.forEach(v => {
+    const val = solution[v];
+    const disp = fmtNum(val);
+    html += `<div class="result-row">
+      <span class="var-name">${v}</span>
+      <span style="color:var(--color-text-secondary,#666);font-size:15px">=</span>
+      <span class="var-val">${disp}</span>
+      <span class="var-check">${allOk ? 'перевірено' : 'помилка перевірки'}</span>
+    </div>`;
+  });
+  html += '</div>';
   return html;
 }
+
+// ─── main ─────────────────────────────────────────────────────────────────────
 
 function solve() {
   const text = document.getElementById('input').value;
   const out = document.getElementById('output');
   try {
     const { vars, rows } = parseEquations(text);
-    if (vars.length === 0) throw new Error('No variables found in input');
+    if (vars.length === 0) throw new Error('Змінних не знайдено у вхідних даних');
     const { solution, snapshots } = gaussianElimination(vars, rows);
-    const checks = verify(vars, rows, solution);
-    const allOk = checks.every(Boolean);
 
-    let html = '<div class="result-box"><div class="result-header">Solution</div>';
-    vars.forEach(v => {
-      const val = solution[v];
-      const disp = Math.abs(val) < 1e-10 ? '0' : val.toFixed(6).replace(/\.?0+$/, '');
-      html += `<div class="result-row">
-        <span class="var-name">${v}</span>
-        <span style="color:var(--color-text-secondary);font-size:15px">=</span>
-        <span class="var-val">${disp}</span>
-        <span class="var-check">${allOk ? 'verified' : 'check failed'}</span>
-      </div>`;
-    });
-    html += '</div>';
-
-    html += `<div class="steps-box">
-      <button class="steps-toggle" onclick="toggleSteps(this)" aria-expanded="false">
-        <span>Show elimination steps (${snapshots.length} matrices)</span>
-        <i class="ti ti-chevron-down" aria-hidden="true"></i>
-      </button>
-      <div class="steps-content">`;
-
-    snapshots.forEach((snap, i) => {
-      html += `<div class="step-block">
-        <div class="step-label">${i === 0 ? snap.label : `<em>${snap.label}</em>`}</div>
-        ${renderMatrix(snap, vars)}
-      </div>`;
-    });
-
-    html += '</div></div>';
-    out.innerHTML = html;
+    out.innerHTML = renderSolution(vars, solution, rows) + renderBlank(vars, snapshots);
   } catch (e) {
     out.innerHTML = `<div class="error-box">${e.message}</div>`;
   }
-}
-
-function toggleSteps(btn) {
-  const c = btn.nextElementSibling;
-  const open = c.classList.toggle('open');
-  btn.setAttribute('aria-expanded', open);
-  btn.querySelector('span').textContent = open
-    ? btn.querySelector('span').textContent.replace('Show', 'Hide')
-    : btn.querySelector('span').textContent.replace('Hide', 'Show');
-  btn.querySelector('.ti').className = open ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
 }
 
 function clearAll() {
@@ -313,3 +435,5 @@ function clearAll() {
 
 solve();
 </script>
+</body>
+</html>
